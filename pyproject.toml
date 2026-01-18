@@ -60,6 +60,13 @@ typecheck = [
 module-name = "ahe._core"
 python-packages = ["ahe"]
 python-source = "src"
+exclude = [
+    "scratch/*",
+    "scripts/*",
+    "static/*",
+    "uv.lock",
+    ".*",
+]
 
 [tool.uv]
 cache-keys = [{ file = "pyproject.toml" }, { file = "src/**/*.rs" }, { file = "Cargo.toml" }, { file = "Cargo.lock" }]
