@@ -7,6 +7,7 @@
 # ]
 # ///
 import re
+import subprocess
 import sys
 from dataclasses import dataclass
 from difflib import unified_diff
@@ -39,14 +40,14 @@ CARGO_TOML = ROOT / "Cargo.toml"
 class Metadata:
     current_python_static_version: Version
     current_rust_static_version: Version
-    # latest_git_tag: str
+    latest_git_tag: str
 
-    # @property
-    # def latest_git_version(self) -> Version:
-    #     if not STABLE_TAG_REGEXP.match(self.latest_git_tag):
-    #         logger.error(f"Failed to parse git tag (got {self.latest_git_tag})")
-    #         raise SystemExit(1)
-    #     return Version(self.latest_git_tag)
+    @property
+    def latest_git_version(self) -> Version:
+        if not STABLE_TAG_REGEXP.match(self.latest_git_tag):
+            logger.error(f"Failed to parse git tag (got {self.latest_git_tag})")
+            raise SystemExit(1)
+        return Version(self.latest_git_tag)
 
 
 def check_static_version(md: Metadata) -> int:
@@ -56,12 +57,12 @@ def check_static_version(md: Metadata) -> int:
             "conform to expected pattern for a stable sem-ver version.",
         )
         return 1
-    # elif md.current_python_static_version < md.latest_git_version:
-    #     logger.error(
-    #         f"Current static version {md.current_python_static_version} appears "
-    #         f"to be older than latest git tag {md.latest_git_tag}",
-    #     )
-    #     return 1
+    elif md.current_python_static_version < md.latest_git_version:
+        logger.error(
+            f"Current static version {md.current_python_static_version} appears "
+            f"to be older than latest git tag {md.latest_git_tag}",
+        )
+        return 1
     elif md.current_python_static_version != md.current_rust_static_version:
         logger.error(
             f"Python package version {md.current_python_static_version} and "
@@ -107,17 +108,17 @@ def main() -> int:
         crate_table = tomllib.load(fh)
         current_rust_static_version = Version(crate_table["package"]["version"])
 
-    # cp = subprocess.run(
-    #     ["git", "describe", "--tags", "--abbrev=0"],
-    #     check=True,
-    #     capture_output=True,
-    # )
-    # cp_stdout = cp.stdout.decode().strip()
+    cp = subprocess.run(
+        ["git", "describe", "--tags", "--abbrev=0"],
+        check=True,
+        capture_output=True,
+    )
+    cp_stdout = cp.stdout.decode().strip()
 
     md = Metadata(
         current_python_static_version,
         current_rust_static_version,
-        # cp_stdout,
+        cp_stdout,
     )
 
     return check_static_version(md) + check_readme(md)
