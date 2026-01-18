@@ -9,6 +9,11 @@ from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 
+from ahe._api import (
+    SUPPORTED_AHE_KINDS,
+    SlidingTile,
+    TileInterpolation,
+)
 from ahe._core import (
     equalize_histogram_f32,
     equalize_histogram_f64,
@@ -16,11 +21,6 @@ from ahe._core import (
     equalize_histogram_sliding_tile_f64,
     equalize_histogram_tile_interpolation_f32,
     equalize_histogram_tile_interpolation_f64,
-)
-from ahe._histeq import (
-    SUPPORTED_AHE_KINDS,
-    SlidingTile,
-    TileInterpolation,
 )
 from ahe._typing import UNSET, UnsetType
 
@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     from numpy import float32 as f32
     from numpy import float64 as f64
 
-    from ahe._histeq import Strategy, StrategySpec
+    from ahe._api import Strategy, StrategySpec
     from ahe._typing import Pair
 
     F = TypeVar("F", f32, f64)
