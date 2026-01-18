@@ -12,19 +12,24 @@ a low-level implementation.
 
 ## Development status
 
-> [!WARNING] pre-alpha software
+> [!WARNING]
+> pre-alpha software
 
 ## Installation
 
-> [!IMPORTANT] TODO
+> [!IMPORTANT]
+> TODO
 
 ## Usage
 
-> [!IMPORTANT] TODO
+> [!IMPORTANT]
+> TODO
 
 ## Migrating from `scikit-image`
 ### Why
-> [!IMPORTANT] TODO
+> [!IMPORTANT]
+> TODO
+
 - a much smaller package
 - future portability (abi3 wheels)
 - better performance
@@ -32,4 +37,5 @@ a low-level implementation.
 - improved guarantees on transformation invariants
 
 ### How
-> [!IMPORTANT] TODO
+> [!IMPORTANT]
+> TODO
