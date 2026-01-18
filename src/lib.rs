@@ -2,14 +2,13 @@ use interpn::one_dim::linear::LinearHoldLast1D;
 use interpn::one_dim::Interp1D;
 use interpn::RegularGrid1D;
 use num_traits::{Float, NumCast, Signed};
-use numpy::borrow::{PyReadonlyArray2};
+use numpy::borrow::PyReadonlyArray2;
 use numpy::ndarray::{s, Array1, Array2, ArrayView, ArrayView1, ArrayView2, Axis, Dimension};
 use numpy::{PyArray2, ToPyArray};
 use pyo3::types::PyModuleMethods;
 use pyo3::{pyfunction, pymodule, types::PyModule, wrap_pyfunction, Bound, PyResult, Python};
 use std::collections::VecDeque;
 use std::ops::{AddAssign, Mul, Sub};
-
 
 #[derive(Clone, Copy, PartialEq)]
 struct ArrayDimensions {
@@ -27,7 +26,6 @@ struct PixelIndex {
 trait AtLeastF32: Float + From<f32> + Signed + AddAssign<<Self as Mul>::Output> {}
 impl AtLeastF32 for f32 {}
 impl AtLeastF32 for f64 {}
-
 
 #[derive(Clone, Copy, PartialEq)]
 struct Range<T> {
@@ -558,7 +556,6 @@ fn equalize_histogram_tile_interpolation<'py, T: AtLeastF32 + numpy::Element>(
     }
     out.to_pyarray(py)
 }
-
 
 #[pymodule(gil_used = false)]
 fn _core<'py>(_py: Python<'py>, m: &Bound<'py, PyModule>) -> PyResult<()> {
