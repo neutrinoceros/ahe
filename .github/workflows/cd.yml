@@ -1,0 +1,318 @@
+name: CD
+on:
+  push:
+    tags: v*
+  pull_request:
+    paths:
+    - Cargo.toml
+    - Cargo.lock
+    - .cargo/config.toml
+    - pyproject.toml
+    - .github/workflows/cd.yml
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  pre-publication-checks:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Source
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      with:
+        fetch-depth: 0
+        persist-credentials: false
+    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+      with:
+        enable-cache: false
+    - name: Pre-publication checks
+      run: uv run scripts/pre_publish_checks.py
+
+  build-sdist:
+    name: Build source distribution
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      with:
+        persist-credentials: false
+    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+      with:
+        enable-cache: true
+        prune-cache: false
+        cache-suffix: build
+    - name: Build sdist
+      run: uv build --sdist
+    - name: Upload sdist
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      with:
+        name: sdist
+        path: dist/*.tar.gz
+
+  test-sdist:
+    name: Test source distribution
+    needs: [build-sdist]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Source
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      with:
+        persist-credentials: false
+    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+      with:
+        enable-cache: false
+    - run: uv sync --only-group test
+    - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      with:
+        path: dist
+        name: sdist
+    - name: test source distribution in isolation
+      run: |
+        tar xzf dist/*.tar.gz
+        cd ahe-*
+        uv pip install .
+        uv run --no-project pytest --color=yes -ra
+
+  macos-intel:
+    runs-on: macos-15-intel
+    steps:
+    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      with:
+        persist-credentials: false
+    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+      with:
+        python-version: '3.10'
+        enable-cache: false
+
+    - name: Configure uv
+      # this step is needed to avoid a collision with system PyPy
+      run: |
+        echo "UV_PYTHON_PREFERENCE=only-managed" >> $GITHUB_ENV
+
+    - uses: dtolnay/rust-toolchain@stable # zizmor: ignore[unpinned-uses]
+    - name: Build wheels - x86_64
+      uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
+      with:
+        target: x86_64
+        args: --release --out dist --no-default-features -F fma
+    - name: Test wheel
+      run: |
+        uv sync --only-group test
+        uv pip install numpy
+        uv pip install ahe --no-index --find-links dist --no-deps
+        uv run --no-sync pytest --color=yes
+    - name: Upload wheels
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      with:
+        name: wheels-mac-intel
+        path: dist
+
+  macos-arm64:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      with:
+        persist-credentials: false
+    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+      with:
+        python-version: '3.10'
+        enable-cache: false
+    - uses: dtolnay/rust-toolchain@stable # zizmor: ignore[unpinned-uses]
+    - name: Build wheels - arm64
+      uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
+      with:
+        target: aarch64-apple-darwin
+        args: --release --out dist
+    - name: Test wheel
+      run: |
+        uv sync --only-group test
+        uv pip install numpy
+        uv pip install ahe --no-index --find-links dist --no-deps
+        uv run --no-sync pytest --color=yes
+    - name: Upload wheels
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      with:
+        name: wheels-mac-arm64
+        path: dist
+
+  windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        target:
+        - x86
+        - x64
+    steps:
+    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      with:
+        persist-credentials: false
+    - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+      with:
+        python-version: '3.10'
+        architecture: ${{ matrix.target }}
+    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+      with:
+        enable-cache: false
+    - uses: dtolnay/rust-toolchain@stable # zizmor: ignore[unpinned-uses]
+    - name: Build wheels
+      uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
+      with:
+        target: ${{ matrix.target }}
+        args: --release --out dist --no-default-features -F fma
+    - name: Configure uv
+      run: |
+        echo "UV_PYTHON_PREFERENCE=only-system" >> $GITHUB_ENV
+    - name: Test wheel
+      run: |
+        uv sync --only-group test
+        uv pip install numpy
+        uv pip install ahe --no-index --find-links dist --no-deps
+        uv run --no-sync pytest --color=yes
+    - name: Upload wheels
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      with:
+        name: wheels-win-${{ matrix.target }}
+        path: dist
+
+  windows-arm64:
+    # this job is separate because it requires a newer Python version, and a dedicated runner
+    name: windows (arm64)
+    runs-on: windows-11-arm
+    steps:
+    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      with:
+        persist-credentials: false
+    - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+      with:
+        python-version: 3.11
+        architecture: arm64
+    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+      with:
+        enable-cache: false
+    - uses: dtolnay/rust-toolchain@stable # zizmor: ignore[unpinned-uses]
+    - name: Build wheels
+      uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
+      with:
+        target: aarch64-pc-windows-msvc
+        args: --release --out dist
+    - name: Configure uv
+      run: |
+        echo "UV_PYTHON_PREFERENCE=only-system" >> $GITHUB_ENV
+    - name: Test wheel
+      run: |
+        uv sync --only-group test
+        uv pip install numpy typing-extensions
+        uv pip install ahe --no-index --find-links dist --no-deps
+        uv run --no-sync pytest --color=yes
+    - name: Upload wheels
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      with:
+        name: wheels-win-arm64
+        path: dist
+
+  manylinux:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+        - x86_64
+        - aarch64
+    steps:
+    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      with:
+        persist-credentials: false
+    - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+      with:
+        python-version: '3.10'
+        architecture: x64
+    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+      with:
+        enable-cache: false
+    - name: Build wheels
+      uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
+      with:
+        target: ${{ matrix.target }}
+        manylinux: '2_28'
+        args: --release --out dist --no-default-features -F fma ${{ startsWith( matrix.target , 'aarch64' ) && '-F branchless' || '' }}
+    - name: Configure uv
+      run: |
+        echo "UV_PYTHON_PREFERENCE=only-system" >> $GITHUB_ENV
+    - name: Test wheel
+      if: matrix.target == 'x86_64'
+      run: |
+        uv sync --only-group test
+        uv pip install numpy
+        uv pip install ahe --no-index --find-links dist --no-deps
+        uv run --no-sync pytest --color=yes
+    - name: Upload wheels
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      with:
+        name: wheels-manylinux-${{ matrix.target }}
+        path: dist
+
+  musllinux:
+    # cross-compiling: no testing
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+        - x86_64-unknown-linux-musl
+        - aarch64-unknown-linux-musl
+    steps:
+    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      with:
+        persist-credentials: false
+    - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+      with:
+        python-version: '3.10'
+        architecture: x64
+    - name: Build wheels
+      uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
+      with:
+        target: ${{ matrix.target }}
+        manylinux: musllinux_1_2
+        args: --release --out dist --no-default-features -F fma ${{ startsWith( matrix.target , 'aarch64' ) && '-F branchless' || '' }}
+    - name: Upload wheels
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      with:
+        name: wheels-musllinux-${{ matrix.target }}
+        path: dist
+
+  deploy:
+    name: Publish to PyPI
+    needs:
+    - pre-publication-checks
+    - build-sdist
+    - test-sdist
+    - macos-intel
+    - macos-arm64
+    - windows
+    - windows-arm64
+    - manylinux
+    - musllinux
+    environment:
+      name: pypi
+      url: https://pypi.org/p/ahe
+    permissions:
+      id-token: write
+
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
+    steps:
+    - name: Download sdist
+      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      with:
+        path: dist
+        name: sdist
+
+    - name: Download wheels
+      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      with:
+        path: dist
+        pattern: wheels-*
+        merge-multiple: true
+
+    - name: Publish package distributions to PyPI
+      uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0

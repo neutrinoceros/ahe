@@ -1,0 +1,126 @@
+[project]
+name = "ahe"
+version = "0.0.1"
+description = "(Adaptive) Histogram Equalization library for Python, written in Rust"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [ { name = "C.M.T Robert" } ]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Development Status :: 2 - Pre-Alpha",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: Free Threading :: 4 - Resilient",
+    "Topic :: Artistic Software",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Topic :: Scientific/Engineering :: Image Processing",
+    "Typing :: Typed",
+]
+requires-python = ">=3.10" # keep in sync with pyo3 (Cargo.toml)
+dependencies = [
+    "exceptiongroup>=1.0.0 ; python_full_version < '3.11'", # keep in sync with typecheck dep group
+    "numpy>=1.22.0",
+    "typing-extensions>=4.1.0 ; python_full_version < '3.11'",
+]
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[dependency-groups]
+covcheck = [
+    {include-group = "test"},
+    "coverage[toml] ; python_version < '3.11'",
+    "coverage>=7.10.0",
+]
+test = [
+    "pytest>=9.0.0",
+    "runtime-introspect>=0.3.0",
+]
+typecheck = [
+    "exceptiongroup>=1.0.0", # keep in sync with conditional runtime dep
+    "basedpyright>=1.26.0",
+    "mypy>=1.13.0",
+    "pyright>=1.1.391",
+]
+
+[tool.maturin]
+module-name = "ahe._core"
+python-packages = ["ahe"]
+python-source = "src"
+
+[tool.uv]
+cache-keys = [{ file = "pyproject.toml" }, { file = "src/**/*.rs" }, { file = "Cargo.toml" }, { file = "Cargo.lock" }]
+
+[tool.pytest.ini_options]
+minversion = "9.0"
+strict = true
+addopts = ["-ra"]
+filterwarnings = [
+  "error",
+]
+
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+
+# use exclude_also to *extend* the default exclude_lines,
+# and allow purely defensive code patterns
+exclude_also = [
+    "^\\s*raise (Assertion|NotImplemented)Error\\b",
+    "^\\s*case _ as _?unreachable:",
+]
+
+[tool.pyright]
+reportImplicitStringConcatenation = false
+reportUnnecessaryTypeIgnoreComment = false # todo: drop this when Python 3.10 is EOL
+reportIgnoreCommentWithoutRule = false
+enableTypeIgnoreComments = true
+
+[tool.mypy]
+strict = true
+show_error_codes = true
+show_error_context = true
+warn_unused_ignores = false
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_errors = true
+
+[tool.ruff.lint]
+ignore = ["E501"]
+select = [
+    "E",
+    "F",
+    "W",
+    "D",   # pydocstyle
+    "C4",  # flake8-comprehensions
+    "B",   # flake8-bugbear
+    "TCH", # flake8-type-checking
+    "YTT", # flake8-2020
+    "I",   # isort
+    "UP",  # pyupgrade
+    "NPY", # numpy specific rules
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D"]
+"scripts/*" = ["D"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"

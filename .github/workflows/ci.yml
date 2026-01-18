@@ -1,0 +1,313 @@
+name: CI
+on:
+  # push:
+  #   branches:
+  #   - main
+  pull_request:
+    paths-ignore:
+    - README.md
+    - CHANGELOG.md
+  schedule:
+  # run this at 03:03 on day-of-month 3.
+  - cron: 3 3 3 * *
+  workflow_dispatch:
+
+concurrency:
+  # auto-cancel any in-progress job *on the same branch*
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+permissions: {}
+
+jobs:
+
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Source
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      with:
+        persist-credentials: false
+    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+      with:
+        enable-cache: true
+        prune-cache: false
+    - name: Check build
+      run: uv build
+    - name: Check sdist's size
+      run: uv run scripts/check_sdist.py
+
+  pre-publication-checks:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Source
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      with:
+        fetch-depth: 0
+        persist-credentials: false
+    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+      with:
+        enable-cache: false
+    - name: Pre-publication checks
+      run: uv run scripts/pre_publish_checks.py
+
+  lint-rust:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      with:
+        persist-credentials: false
+    # this check should run as fast as possible, so, set up a cache
+    - uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
+    - run: cargo clippy --all-targets --all-features -- -D warnings
+    - run: cargo fmt --check
+
+  resolve-msrv:
+    runs-on: ubuntu-latest
+    outputs:
+      MSRV: ${{ steps.resolve-msrv.outputs.MSRV }}
+    steps:
+    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8   # v6.0.1
+      with:
+        persist-credentials: false
+    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867   # v7.1.6
+      with:
+        python-version: '3.14'
+        enable-cache: false
+    - name: resolve MSRV
+      id: resolve-msrv
+      run: |
+        echo MSRV=`python -c 'import tomllib; print(tomllib.load(open("Cargo.toml", "rb"))["package"]["rust-version"])'` >> $GITHUB_OUTPUT
+
+  check-msrv:
+    needs: [resolve-msrv]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      with:
+        persist-credentials: false
+    - run: echo MSRV=${NEEDS_RESOLVE_MSRV_OUTPUTS_MSRV}
+      env:
+        NEEDS_RESOLVE_MSRV_OUTPUTS_MSRV: ${{ needs.resolve-msrv.outputs.MSRV }}
+    - run: rustup default ${NEEDS_RESOLVE_MSRV_OUTPUTS_MSRV} && rustup default ${NEEDS_RESOLVE_MSRV_OUTPUTS_MSRV}
+      env:
+        NEEDS_RESOLVE_MSRV_OUTPUTS_MSRV: ${{ needs.resolve-msrv.outputs.MSRV }}
+    # this check is very slow, so, set up a cache
+    - uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
+    - run: cargo build --verbose
+    - run: cargo test --verbose
+
+  rust-tests:
+    name: Rust project - ${{ matrix.toolchain }} - ${{ matrix.feature-args }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toolchain:
+        - stable
+        - beta
+        - nightly
+        feature-args:
+        - ''
+        - -F branchless
+        - -F fma
+        - -F branchless,fma
+    steps:
+    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      with:
+        persist-credentials: false
+    - run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
+    - run: cargo build --verbose --no-default-features ${{ matrix.feature-args }}
+    - run: cargo test --verbose --no-default-features ${{ matrix.feature-args }}
+
+  rust-tests-future-deps:
+    name: Rust project - future dependencies
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Source
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      with:
+        persist-credentials: false
+    - run: rustup update
+    - name: Override dependencies
+      run: |
+        echo '[patch.crates-io]' >> Cargo.toml
+        echo 'pyo3 = { git = "https://github.com/PyO3/pyo3.git" }' >> Cargo.toml
+        echo 'numpy = { git = "https://github.com/pyO3/rust-numpy.git" }' >> Cargo.toml
+        echo 'num-traits = { git = "https://github.com/rust-num/num-traits.git" }' >> Cargo.toml
+    - run: cargo build --verbose
+    - run: cargo test --verbose
+
+  python-tests:
+    name: ${{matrix.os}} x py${{matrix.python-version}} ${{matrix.label}}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+        - ubuntu-latest
+        python-version:
+        - '3.10'
+        - '3.14'
+        - 3.14t
+        build-flags: ['']
+        label: ['']
+
+        include:
+        - os: ubuntu-latest
+          python-version: '3.14'
+          build-flags: --config-setting 'build-args=--profile=dev'
+          label: (debug build)
+
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Checkout Source
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      with:
+        persist-credentials: false
+    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+      with:
+        python-version: ${{ matrix.python-version }}
+        enable-cache: true
+        prune-cache: false
+        cache-suffix: covcheck
+
+    - name: Test (with coverage)
+      if: ${{ startsWith( matrix.os , 'ubuntu' ) }}
+      run: |
+        uv sync --group covcheck ${{ matrix.build-flags }}
+        uv run --no-sync coverage run --parallel-mode -m pytest --color=yes
+    - name: Test (without coverage)
+      if: ${{ !startsWith( matrix.os , 'ubuntu' ) }}
+      run: |
+        uv sync --no-editable --group test ${{ matrix.build-flags }}
+        uv run --no-sync pytest --color=yes
+
+    - name: Upload coverage data
+      # only using reports from ubuntu because
+      # combining reports from multiple platforms is tricky (or impossible ?)
+      if: matrix.os == 'ubuntu-latest'
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      with:
+        name: ahe_coverage_data-${{matrix.os}}-${{matrix.python-version}}-${{matrix.label}}
+        path: .coverage.*
+        if-no-files-found: ignore
+        include-hidden-files: true
+
+  minimal-env:
+    name: Minimal requirements
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      with:
+        persist-credentials: false
+    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+      with:
+        python-version: 3.10.0
+        enable-cache: true
+        prune-cache: false
+        cache-suffix: test
+    - name: Configure uv
+      run: |
+        echo "UV_RESOLUTION=lowest" >> $GITHUB_ENV
+    - run: uv sync --no-editable --group test
+    - name: Test
+      run: uv run --no-sync pytest --color=yes -Wdefault
+
+  python-coverage:
+    name: Combine & check coverage.
+    runs-on: ubuntu-latest
+    needs:
+    - python-tests
+
+    steps:
+    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      with:
+        persist-credentials: false
+    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+      with:
+        python-version: '3.14'
+        enable-cache: true
+        prune-cache: false
+        cache-suffix: covcheck-merge
+
+    - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      with:
+        pattern: ahe_coverage_data-*
+        merge-multiple: true
+
+    - name: Check coverage
+      run: |
+        uv tool install coverage
+        coverage combine
+        coverage html --skip-covered --skip-empty
+        coverage report --skip-covered --format=markdown >> "$GITHUB_STEP_SUMMARY"
+        coverage report --fail-under=100
+
+    - name: Upload HTML report if check failed.
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      with:
+        name: ahe_coverage_report
+        path: htmlcov
+      if: ${{ failure() }}
+
+  python-future-deps:
+    name: Future Python dependencies
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Source
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      with:
+        persist-credentials: false
+    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+      with:
+        python-version: '3.14'
+        enable-cache: false
+    - name: Configure uv
+      run: |
+        echo "UV_PRERELEASE=allow" >> $GITHUB_ENV
+        echo "UV_INDEX=https://pypi.anaconda.org/scientific-python-nightly-wheels/simple" >> $GITHUB_ENV
+        echo "UV_INDEX_STRATEGY=unsafe-best-match" >> $GITHUB_ENV
+    - run: uv lock --upgrade -p "$UV_PYTHON"
+    - run: uv sync --no-editable --no-default-groups --group test
+    - name: Test
+      run: uv run --no-sync pytest --color=yes
+
+  typecheck-strict:
+    strategy:
+      matrix:
+        python-version:
+        - '3.10'
+        - '3.14'
+    runs-on: ubuntu-latest
+    name: type check
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      with:
+        persist-credentials: false
+
+    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+      with:
+        python-version: ${{ matrix.python-version }}
+        enable-cache: true
+        prune-cache: false
+        cache-suffix: typecheck
+
+    - run: uv sync --group typecheck
+    - name: Typecheck (mypy)
+      run: uv run --no-sync mypy src
+
+    - name: Typecheck (pyright)
+      run: uv run --no-sync pyright src
+
+    #- name: Verify Types (pyright)
+    #  run: uv run --no-sync pyright --verifytypes ahe
+
+    - name: Typecheck (basedpyright)
+      run: uv run --no-sync basedpyright src
+
+    #- name: Verify Types (basedpyright)
+    #  run: uv run --no-sync basedpyright --verifytypes ahe

@@ -1,0 +1,29 @@
+[package]
+name = "ahe"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.87" # 2025-05-15
+
+[lib]
+name = "_core"
+# "cdylib" is necessary to produce a shared library for Python to import from.
+crate-type = ["cdylib"]
+
+[dependencies]
+interpn = "0.11.0"
+num-traits = "0.2.19"
+numpy = "0.27.1"
+pyo3 = { version = "0.27.1", features = ["extension-module", "abi3-py310"] }
+
+[profile.release]
+# https://nnethercote.github.io/perf-book/build-configuration.html#codegen-units
+codegen-units = 1
+# https://nnethercote.github.io/perf-book/build-configuration.html#abort-on-panic
+panic = "abort"
+# https://nnethercote.github.io/perf-book/build-configuration.html#strip-debug-info-and-symbols
+strip = "symbols"
+
+[features]
+default = ["fma", "branchless"]
+fma = ["interpn/fma"]
+branchless = []
