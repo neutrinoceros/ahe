@@ -27,13 +27,21 @@ a low-level implementation.
 
 ## Migrating from `scikit-image`
 ### Why
+
+Put simply, if all your project needs from `scikit-image` is `skimage.exposure.equalize_(adapt)hist`, `ahe` provides a much more lightweight and portable replacement.
+
+`ahe` has no runtime dependencies beyond `numpy`. Additionally, its binaries are orders of magnitude lighter than `scikit-image`'s, as well as future-compatible with yet-unreleased versions of Python.
+
+<!-- Generated with `uv run scripts/doc_graphs.py` -->
+<p align="center">
+<a href="https://github.com/neutrinoceros/ahe">
+<img src="https://raw.githubusercontent.com/neutrinoceros/ahe/main/static/wheel-size.png" width="900"></a>
+</p>
+
 > [!IMPORTANT]
 > TODO
 
-- a much smaller package
-- future portability (abi3 wheels)
 - better performance
-- no deps beyond numpy
 - improved guarantees on transformation invariants
 
 ### How
