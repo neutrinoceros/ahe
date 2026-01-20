@@ -54,6 +54,8 @@ Put simply, if all your project needs from `scikit-image` is `skimage.exposure.e
   </picture>
 </p>
 
+(*: `numpy` itself, as the common dependency to `ahe` and `scikit-image` is excluded from this graph)
+
 > [!IMPORTANT]
 > TODO
 
