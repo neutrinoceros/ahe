@@ -48,9 +48,9 @@ Put simply, if all your project needs from `scikit-image` is `skimage.exposure.e
 <!-- Generated with `uv run scripts/doc_graphs.py` -->
 <p align="center">
   <picture align="center">
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/neutrinoceros/ahe/test-b/assets/wheel-size-dark.svg" width="900">
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/neutrinoceros/ahe/test-b/assets/wheel-size-light.svg" width="900">
-    <img alt="Shows a bar chart comparing wheel sizes" src="https://raw.githubusercontent.com/neutrinoceros/ahe/test-b/assets/wheel-size-dark.svg" width="900">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/neutrinoceros/ahe/main/assets/wheel-size-dark.svg" width="900">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/neutrinoceros/ahe/main/assets/wheel-size-light.svg" width="900">
+    <img alt="Shows a bar chart comparing wheel sizes" src="https://raw.githubusercontent.com/neutrinoceros/ahe/main/assets/wheel-size-dark.svg" width="900">
   </picture>
 </p>
 
