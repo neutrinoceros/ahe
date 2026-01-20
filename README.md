@@ -13,12 +13,25 @@ a low-level implementation.
 ## Development status
 
 > [!WARNING]
-> pre-alpha software
+> `ahe` is pre-alpha software
+
+`ahe` is developed in the open, but currently unstable.
+- `ahe.equalize_histogram(image, adaptive_strategy={"kind": "tile-interpolation", ...}, ...)` is known to produce incorrect results
+- other essential features are missing:
+  - boundary conditions
+  - contrast limitations
+- documentation, examples and references are currently lacking
+- binaries are not published
+
 
 ## Installation
 
-> [!IMPORTANT]
-> TODO
+> [!WARNING]
+> pre-built binaries (wheels) are not published at this stage. A rust compiler toolchain is needed in order to install this package.
+
+```
+$ python -m pip install ahe
+```
 
 ## Usage
 
