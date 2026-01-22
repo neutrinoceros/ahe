@@ -35,8 +35,31 @@ $ python -m pip install ahe
 
 ## Usage
 
+### Simple Histogram Equalization (HE)
 > [!IMPORTANT]
 > TODO
+
+### Adaptive Histogram equalization (AHE)
+> [!IMPORTANT]
+> TODO:
+> - intro
+> - references
+
+
+#### Prioritizing accuracy: sliding-tile
+> [!IMPORTANT]
+> TODO
+
+> [!NOTE]
+> This strategy requires odd-sized tile shapes, but supports
+> image shapes with any parity.
+
+#### Prioritizing performance: tile-interpolation
+> [!IMPORTANT]
+> TODO
+
+> [!NOTE]
+> This strategy requires even-sized tile and image shapes.
 
 ## Migrating from `scikit-image`
 ### Why
