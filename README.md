@@ -35,31 +35,111 @@ $ python -m pip install ahe
 
 ## Usage
 
-### Simple Histogram Equalization (HE)
-> [!IMPORTANT]
-> TODO
+### Simple Histogram Equalization
+
+We'll start by defining an image composed of noise.
+
+```python
+import ahe
+import numpy as np
+
+image_shape = (128, 128)
+prng = np.random.default_rng(0)
+image = np.clip(
+    prng.normal(
+        loc=0.5,
+        scale=0.25,
+        size=np.prod(image_shape),
+    ).reshape(image_shape),
+    a_min=0.0,
+    a_max=1.0,
+)
+```
+
+Non-adaptive histogram equalization is performed as follow
+```python
+image_eq = ahe.equalize_histogram(image)
+```
+This method is least expensive in terms of strain put on hardware resources.
+However, as a single histogram is computed and adjusted over the entire image,
+this technique is known to amplify noise in near-uniform regions.
 
 ### Adaptive Histogram equalization (AHE)
-> [!IMPORTANT]
-> TODO:
-> - intro
-> - references
-
+Adaptive Histogram Equalization (AHE) was designed to overcome this limitation by
+instead computing more localized (and numerous) histograms, improving the *local*
+contrast in all regions, at the cost of a reduced efficiency.
+As illustrated in the following, there are two main variants of AHE, sliding-tile and
+tile-interpolation. As the names suggest, both methods rely on the use of of tiles,
+also known as *contextual regions*, that define sub-domains in which different histograms
+are computed and applied.
 
 #### Prioritizing accuracy: sliding-tile
-> [!IMPORTANT]
-> TODO
+
+True AHE is intrinsically an expensive operation to perform, as it requires computing
+a different histogram *per pixel*. The most efficient way to accomplish this, originally
+proposed by Fizer et al (1987), minimises the redundancy of intermediate steps in computations and is known as the sliding-tile variant of AHE.
+Here's how to use it in `ahe`
+
+```python
+image_eq = ahe.equalize_histogram(
+    image,
+    adaptive_strategy={
+        'kind': 'sliding-tile',
+        'tile-size': 15,
+    },
+)
+```
 
 > [!NOTE]
 > This strategy requires odd-sized tile shapes, but supports
 > image shapes with any parity.
 
+While an exact implementation of AHE, this algorithm remains resource-demanding.
+
 #### Prioritizing performance: tile-interpolation
-> [!IMPORTANT]
-> TODO
+
+Alternatively, very similar results can be obtained at a fraction of the cost using
+an approximative method known as the tile-interpolation variant of AHE, also
+introduced by Fizer et al (1987).
+In this method, an image is split into equal-sized sub domains (tiles), which may be
+specified either from a tile size
+
+```python
+
+image_eq = ahe.equalize_histogram(
+    image,
+    adaptive_strategy={
+        'kind': 'tile-interpolation',
+        'tile-size': 16,
+    },
+)
+```
+
+or as a number of tiles to split the domain into (in each direction)
+```python
+image_eq = equalize_histogram(
+    image,
+    adaptive_strategy={
+        'kind': 'tile-interpolation',
+        'tile-into': 8,
+    },
+)
+```
 
 > [!NOTE]
 > This strategy requires even-sized tile and image shapes.
+
+### General rules for tiling schemes
+
+In all AHE strategies, all tiles created will be the exact same size, regardless
+of the pixel's relative position in the image. The whole domain is generally padded
+internally in order to respect this rule. The exact method used for padding is
+controlled by the `boundaries` keyword argument.
+
+Both `'tile-size'` and `'tile-into'` will accept either a shape as a pair of
+integers `(n, m)`, or a single integer `n`, which is a shorthand for `(n, n)`, as
+illustrated above.
+
 
 ## Migrating from `scikit-image`
 ### Why

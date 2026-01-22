@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - DOC: prefer light-themes graphs when undetermined (improve PyPI rendering)
 - DOC: document technical differences with `scikit-image`, other than binary size and performance
+- DOC: add usage examples to narrative documentation
 
 ## 0.0.2 - 2026-01-22
 
