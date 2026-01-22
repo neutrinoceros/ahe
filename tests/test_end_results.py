@@ -1,3 +1,4 @@
+from importlib.util import find_spec
 from itertools import product
 
 import numpy as np
@@ -156,3 +157,43 @@ def test_historgram_equalization_tile_interpolation_full_ahe(dtype, rtol):
         },
     )
     npt.assert_allclose(res_ti, res_ahe, rtol=rtol)
+
+
+@pytest.mark.skipif(find_spec("skimage") is None, reason="requires scikit-image")
+@pytest.mark.parametrize("dtype", ["float32", "float64"])
+def test_historgram_equalization_tile_interpolation_ref_impl(dtype):
+    from skimage.exposure import equalize_adapthist
+
+    IMAGE_SHAPE = (256, 256)
+
+    # scikit-image's impl isn't L/R symmetric:
+    # half a tile's size worth of padding is added on the left,
+    # and the right side just gets the remainder. As a result, significant
+    # differences should be expected (hence the very permissive rtol value).
+    # In order to minimize those differences though, we can
+    # - use a smaller tile tile and number of bins
+    # - ignore rightmost regions in comparisons
+    TILE_SIZE = 4
+    NBINS = 16
+    prng = np.random.default_rng(0)
+    image = np.clip(
+        prng.normal(loc=0.0, scale=1.0, size=np.prod(IMAGE_SHAPE)).reshape(IMAGE_SHAPE),
+        a_min=0.0,
+        a_max=1.0,  # imposed by equalize_adapthist
+        dtype=dtype,
+    )
+    ref = equalize_adapthist(image, kernel_size=TILE_SIZE, clip_limit=0.0, nbins=NBINS)
+
+    res_ti = ahe.equalize_histogram(
+        image,
+        nbins=NBINS,
+        adaptive_strategy={
+            "kind": "tile-interpolation",
+            "tile-size": TILE_SIZE,
+        },
+    )
+    npt.assert_allclose(
+        res_ti[: IMAGE_SHAPE[0] - 1, : IMAGE_SHAPE[1] - 1],
+        ref[: IMAGE_SHAPE[0] - 1, : IMAGE_SHAPE[1] - 1],
+        rtol=2.2,
+    )

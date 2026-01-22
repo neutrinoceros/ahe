@@ -45,6 +45,9 @@ covcheck = [
     "coverage[toml] ; python_version < '3.11'",
     "coverage>=7.10.0",
 ]
+impl-comp = [
+    "scikit-image>=0.25.2",
+]
 test = [
     "pytest>=9.0.0",
     "runtime-introspect>=0.3.0",
