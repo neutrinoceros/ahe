@@ -175,7 +175,7 @@ jobs:
       if: ${{ startsWith( matrix.os , 'ubuntu' ) }}
       run: |
         uv sync --group covcheck --group impl-comp ${{ matrix.build-flags }}
-        uv run --no-sync coverage run --parallel-mode -m pytest --color=yes
+        uv run --no-sync coverage run --parallel-mode -m pytest --color=yes --doctest-modules
     - name: Test (without coverage)
       if: ${{ !startsWith( matrix.os , 'ubuntu' ) }}
       run: |

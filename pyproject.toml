@@ -81,6 +81,7 @@ addopts = ["-ra"]
 filterwarnings = [
   "error",
 ]
+norecursedirs = ["scripts", "dist"]
 
 [tool.coverage.run]
 branch = true
