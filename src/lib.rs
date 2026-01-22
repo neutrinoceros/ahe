@@ -502,7 +502,7 @@ fn equalize_histogram_tile_interpolation<'py, T: AtLeastF32 + numpy::Element>(
     let tsx = <T as NumCast>::from(tile_shape.x).unwrap();
     for j in 0..tile_shape.x {
         let fj = <T as NumCast>::from(j).unwrap();
-        alpha[j] = xoff + fj / tsx;
+        alpha[j] = (xoff + fj) / tsx;
     }
 
     // y offset, in pixel height, between the top left tile center and the center
@@ -512,7 +512,7 @@ fn equalize_histogram_tile_interpolation<'py, T: AtLeastF32 + numpy::Element>(
     let tsy = <T as NumCast>::from(tile_shape.y).unwrap();
     for i in 0..tile_shape.y {
         let fi = <T as NumCast>::from(i).unwrap();
-        beta[i] = yoff + fi / tsy;
+        beta[i] = (yoff + fi) / tsy;
     }
 
     let stencil = Stencil { x: alpha, y: beta };
