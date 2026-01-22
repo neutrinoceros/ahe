@@ -16,8 +16,7 @@ a low-level implementation.
 > `ahe` is pre-alpha software
 
 `ahe` is developed in the open, but currently unstable.
-- `ahe.equalize_histogram(image, adaptive_strategy={"kind": "tile-interpolation", ...}, ...)` is known to produce incorrect results
-- other essential features are missing:
+- essential features are missing:
   - boundary conditions
   - contrast limitations
 - documentation, examples and references are currently lacking
