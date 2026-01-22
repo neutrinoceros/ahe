@@ -132,11 +132,10 @@ def test_historgram_equalization_sliding_tile_full_ahe(dtype, rtol):
     npt.assert_allclose(res_st, res_ahe, rtol=rtol)
 
 
-# https://github.com/neutrinoceros/ahe/issues/8
-@pytest.mark.parametrize("dtype, rtol", [("float32", 1.25), ("float64", 1.25)])
+@pytest.mark.parametrize("dtype, rtol", [("float32", 0.8), ("float64", 0.75)])
 def test_historgram_equalization_tile_interpolation_full_ahe(dtype, rtol):
     IMAGE_SHAPE = (64, 64)
-    TILE_SIZE = 32
+    TILE_SIZE = 64
     NBINS = 3
     prng = np.random.default_rng(0)
     image = np.clip(
