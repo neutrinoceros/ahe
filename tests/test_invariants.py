@@ -24,7 +24,6 @@ def test_directional_invariance(adaptive_strategy, rtol, subtests):
     prng = np.random.default_rng(0)
 
     image = np.clip(
-        # prng.normal(loc=5.0, scale=1.0, size=np.prod(IMAGE_SHAPE)).reshape(IMAGE_SHAPE),
         prng.normal(loc=0.5, scale=0.25, size=np.prod(IMAGE_SHAPE)).reshape(
             IMAGE_SHAPE
         ),
