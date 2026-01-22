@@ -152,6 +152,8 @@ def equalize_histogram(
 
     strat = ahe_type.from_spec(adaptive_strategy)
     ts = strat.resolve_tile_shape(image.shape)
+    strat = type(strat)(tile_shape=ts)
+    assert strat.tile_shape == ts
     nbins = _resolve_nbins(nbins, ts)
 
     pad_width = strat.resolve_pad_width(image.shape)
