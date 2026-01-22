@@ -27,7 +27,7 @@ a low-level implementation.
 
 > [!WARNING]
 > pre-built binaries (wheels) are not published at this stage.
-# A rust compiler toolchain is needed in order to install this package.
+> A rust compiler toolchain is needed in order to install this package.
 
 ```
 $ python -m pip install ahe
