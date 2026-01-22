@@ -86,10 +86,16 @@ def equalize_histogram(
       Only 'closed' boundaries are accepted at the moment.
       https://github.com/neutrinoceros/rlic/issues/303
 
-    adaptive_strategy: None (default) or a sliding-tile specification, keyword-only
-      not implemented
-      https://github.com/neutrinoceros/rlic/issues/301
-      https://github.com/neutrinoceros/rlic/issues/302
+    adaptive_strategy: None (default) a sliding-tile, or tile-interpolation specification, keyword-only
+        The default behavior is simple Histogram Equalization[^1] (HE).
+        If this argument is not None, Adaptive Histogram Equalization[^2] (AHE) is used
+        instead. Both flavors of efficient AHE, sliding-tile and tile-interpolation, are
+        available, and specified as a dictionary. See Examples for details.
+
+        Note that the tile-size must be odd in the case of a sliding-tile, and even in
+        the case of a tile-interpolation strategy. These restrictions are necessary to
+        prevent left/right biases in the output. Furthermore, tile-interpolation is only
+        supported for images with even sizes in both directions.
 
     contrast_limitation: None, keyword-only
       not implemented
@@ -99,6 +105,57 @@ def equalize_histogram(
     -------
     2D array
         The processed image with values normalized to the [0, 1] interval.
+
+    Examples
+    --------
+    Here's a basic application of basic (non-adaptive) histogram equalization
+
+    >>> import numpy as np
+    >>> image_shape = (128, 128)
+    >>> prng = np.random.default_rng(0)
+    >>> image = np.clip(prng.normal(loc=0.5, scale=0.25, size=np.prod(image_shape)).reshape(image_shape), a_min=0.0, a_max=1.0)
+    >>> equalize_histogram(image) # doctest:+ELLIPSIS
+    array([[...
+    ...]], shape=(128, 128))
+
+    To instead compute exact AHE, one can specify a sliding-tile as follow
+    >>> equalize_histogram(
+    ...    image,
+    ...    adaptive_strategy={
+    ...        'kind': 'sliding-tile',
+    ...        'tile-size': 15,
+    ...    },
+    ... ) # doctest:+ELLIPSIS
+    array([[...
+    ...]], shape=(128, 128))
+
+    It is also possible to reasonably approximate AHE at a fraction of the computational
+    cost using tile-interpolation instead
+    >>> equalize_histogram(
+    ...    image,
+    ...    adaptive_strategy={
+    ...        'kind': 'tile-interpolation',
+    ...        'tile-size': 16,
+    ...    },
+    ... ) # doctest:+ELLIPSIS
+    array([[...
+    ...]], shape=(128, 128))
+
+    This strategy may also be specified with a number of contextual regions used to map
+    the entire image, by providing tile-into instead of tile-size
+    >>> equalize_histogram(
+    ...    image,
+    ...    adaptive_strategy={
+    ...        'kind': 'tile-interpolation',
+    ...        'tile-into': 8,
+    ...    },
+    ... ) # doctest:+ELLIPSIS
+    array([[...
+    ...]], shape=(128, 128))
+
+    Both tile-size and tile-into will accept either a pair of integers (n, m) to
+    distinguish sizes (or divisors, respectively) or a single integer n, as illustrated
+    above, which is a shorthand for (n, n).
     """
     if contrast_limitation is not None:
         raise NotImplementedError  # type: ignore
