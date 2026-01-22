@@ -85,7 +85,8 @@ with yet-unreleased versions of Python.
 excluded from this graph)
 
 `ahe.equalize_histogram` supports more tiling scheme than
-`skimage.exposure.equalize_hist` and `skimage.exposure.equalize_adapthist` combined.
+`skimage.exposure.equalize_hist` and `skimage.exposure.equalize_adapthist` combined,
+ within a consistent interface and a unified feature set.
 In particular, it offers an exact implementation of Adaptive Histogram Equalization
 implemented as a sliding-tile, while `skimage.exposure.equalize_adapthist` only
 supports tile-interpolation (*also* available in `ahe`), which is generally faster,
