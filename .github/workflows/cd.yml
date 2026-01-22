@@ -94,7 +94,7 @@ jobs:
       uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
       with:
         target: x86_64
-        args: --release --out dist --no-default-features -F fma
+        args: --release --out dist
     - name: Test wheel
       run: |
         uv sync --only-group test
@@ -158,7 +158,7 @@ jobs:
       uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
       with:
         target: ${{ matrix.target }}
-        args: --release --out dist --no-default-features -F fma
+        args: --release --out dist
     - name: Configure uv
       run: |
         echo "UV_PYTHON_PREFERENCE=only-system" >> $GITHUB_ENV
@@ -234,7 +234,7 @@ jobs:
       with:
         target: ${{ matrix.target }}
         manylinux: '2_28'
-        args: --release --out dist --no-default-features -F fma ${{ startsWith( matrix.target , 'aarch64' ) && '-F branchless' || '' }}
+        args: --release --out dist
     - name: Configure uv
       run: |
         echo "UV_PYTHON_PREFERENCE=only-system" >> $GITHUB_ENV
@@ -273,7 +273,7 @@ jobs:
       with:
         target: ${{ matrix.target }}
         manylinux: musllinux_1_2
-        args: --release --out dist --no-default-features -F fma ${{ startsWith( matrix.target , 'aarch64' ) && '-F branchless' || '' }}
+        args: --release --out dist
     - name: Upload wheels
       uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
       with:
