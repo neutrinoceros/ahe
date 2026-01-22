@@ -1,6 +1,6 @@
 [project]
 name = "ahe"
-version = "0.0.1"
+version = "0.0.2"
 description = "(Adaptive) Histogram Equalization library for Python, written in Rust"
 license = "GPL-3.0-only"
 license-files = ["LICENSE"]
