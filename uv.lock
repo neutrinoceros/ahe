@@ -8,7 +8,7 @@ resolution-markers = [
 
 [[package]]
 name = "ahe"
-version = "0.0.2"
+version = "0.0.3"
 source = { editable = "." }
 dependencies = [
     { name = "exceptiongroup", marker = "python_full_version < '3.11'" },
