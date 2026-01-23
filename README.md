@@ -161,7 +161,7 @@ with yet-unreleased versions of Python.
   </picture>
 </p>
 
-(*: `numpy` itself, as the common dependency to `ahe` and `scikit-image` is
+(*: `numpy` itself, as the common dependency to `ahe` and `scikit-image`, is
 excluded from this graph)
 
 `ahe.equalize_histogram` supports more tiling scheme than
