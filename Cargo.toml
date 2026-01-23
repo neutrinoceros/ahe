@@ -1,6 +1,6 @@
 [package]
 name = "ahe"
-version = "0.0.2"
+version = "0.0.3"
 edition = "2021"
 rust-version = "1.87" # 2025-05-15
 
