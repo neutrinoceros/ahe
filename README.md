@@ -77,7 +77,7 @@ are computed and applied.
 
 True AHE is intrinsically an expensive operation to perform, as it requires computing
 a different histogram *per pixel*. The most efficient way to accomplish this, originally
-proposed by [Pizer et al. (1987)](#references), minim‡ises the redundancy of intermediate
+proposed by [Pizer et al. (1987)](#references), minimises the redundancy of intermediate
 steps in computations and is known as the sliding-tile variant of AHE. Here's how to use
 it in `ahe`
 
