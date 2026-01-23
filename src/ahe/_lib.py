@@ -61,7 +61,7 @@ def equalize_histogram(
     /,
     *,
     nbins: int | Literal["auto"] = "auto",
-    # boundaries: BoundarySpec = "closed",
+    boundaries: Literal["reflect", "periodic"] = "reflect",
     adaptive_strategy: StrategySpec | None = None,
     contrast_limitation: None = None,
 ) -> ndarray[tuple[int, int], dtype[F]]:
@@ -79,12 +79,12 @@ def equalize_histogram(
       Reduce this number for faster computations.
       Increase it to improve the overall contrast of the result.
 
-    boundaries: 'closed' (default), 'periodic', or a dict with keys 'x' and 'y',
-                and values are either of these strings, or 2-tuples (left, right)
-                thereof. Keyword-only
-
-      Only 'closed' boundaries are accepted at the moment.
-      https://github.com/neutrinoceros/rlic/issues/303
+    boundaries: 'reflect' (default), 'periodic', keyword-only
+        If an adapative_strategy is defined, the image domain is extended to ensure that
+        all pixels, including the vicinity of image edges, are part of tiles with equal
+        shapes.
+        This argument controls how this domain extension is performed in both directions.
+        It has no effect if combined with adaptive_strategy=None.
 
     adaptive_strategy: None (default) a sliding-tile, or tile-interpolation specification, keyword-only
         The default behavior is simple Histogram Equalization[^1] (HE).
@@ -165,6 +165,17 @@ def equalize_histogram(
             f"Found unsupported data type: {image.dtype}. "
             f"Expected of of {_SUPPORTED_DTYPES}."
         )
+    pad_mode: Literal["reflect", "wrap"]
+    match boundaries:
+        case "reflect":
+            pad_mode = "reflect"
+        case "periodic":
+            pad_mode = "wrap"
+        case _:  # pyright: ignore[reportUnnecessaryComparison]
+            raise ValueError(  # pyright: ignore[reportUnreachable]
+                f"Received unknown value {boundaries=}. "
+                "Expected 'reflect' or 'periodic'."
+            )
 
     input_dtype = image.dtype
     if adaptive_strategy is None:
@@ -214,7 +225,7 @@ def equalize_histogram(
     nbins = _resolve_nbins(nbins, ts)
 
     pad_width = strat.resolve_pad_width(image.shape)
-    pimage = np.pad(image, pad_width=pad_width, mode="reflect")
+    pimage = np.pad(image, pad_width=pad_width, mode=pad_mode)
 
     match strat:
         case SlidingTile():

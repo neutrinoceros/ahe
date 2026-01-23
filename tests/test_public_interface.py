@@ -284,6 +284,53 @@ class TestTileInterpolationFromSpec:
         assert strategy == expected
 
 
+class TestBoundaries:
+    IMAGE_SHAPE = (128, 256)
+
+    def test_invalid_boundaries(self):
+        with pytest.raises(
+            ValueError,
+            match=(
+                r"^Received unknown value boundaries=None\. "
+                r"Expected 'reflect' or 'periodic'\.$"
+            ),
+        ):
+            ahe.equalize_histogram(np.eye(5, dtype="float64"), boundaries=None)
+
+    @pytest.mark.parametrize(
+        "adaptive_strategy",
+        [
+            pytest.param({"kind": "sliding-tile", "tile-size": 5}, id="sliding-tile"),
+            pytest.param(
+                {"kind": "tile-interpolation", "tile-size": 64}, id="tile-interpolation"
+            ),
+        ],
+    )
+    def test_boundaries(self, adaptive_strategy, subtests):
+        prng = np.random.default_rng(0)
+        image = prng.normal(size=np.prod(self.IMAGE_SHAPE)).reshape(self.IMAGE_SHAPE)
+        res0 = ahe.equalize_histogram(
+            image, nbins=8, adaptive_strategy=adaptive_strategy
+        )
+        res_reflect = ahe.equalize_histogram(
+            image,
+            nbins=8,
+            adaptive_strategy=adaptive_strategy,
+            boundaries="reflect",
+        )
+        with subtests.test("default='reflect'"):
+            npt.assert_array_equal(res_reflect, res0)
+
+        res_periodic = ahe.equalize_histogram(
+            image,
+            nbins=8,
+            adaptive_strategy=adaptive_strategy,
+            boundaries="periodic",
+        )
+        with subtests.test("'periodic'!='reflect'"):
+            assert np.ptp(np.abs(res_periodic - res_reflect)) > 0.0
+
+
 @pytest.mark.parametrize(
     "adaptive_strategy",
     [

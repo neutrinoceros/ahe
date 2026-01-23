@@ -16,10 +16,8 @@ a low-level implementation.
 > `ahe` is pre-alpha software
 
 `ahe` is developed in the open, but currently unstable.
-- essential features are missing:
-  - boundary conditions
-  - contrast limitations
-- documentation, examples and references are currently lacking
+- contrast limitation, deemed an essential feature, is currently missing
+- documentation is incomplete
 - binaries are not published
 
 
@@ -183,11 +181,12 @@ scheme (as of `scikit-image` `v0.26.0`). This improved tiling scheme comes at th
 cost of stricter requirements in `ahe.equalize_histogram`: the tile-interpolation
 strategy only supports tiles and images with even sizes in both directions.
 
+`ahe.equalize_histogram` also supports periodic boundary conditions, which can be
+specified as `boundaries='periodic'`.
 
 > [!IMPORTANT]
 > TODO
 >- better performance
->- boundary conditions
 
 ### How
 > [!IMPORTANT]

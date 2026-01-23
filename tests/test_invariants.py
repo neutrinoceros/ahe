@@ -1,4 +1,5 @@
 from functools import partial
+from itertools import product
 
 import numpy as np
 import numpy.testing as npt
@@ -46,3 +47,46 @@ def test_directional_invariance(adaptive_strategy, rtol, subtests):
         with subtests.test(name):
             res = invt(heq(t(image)))
             npt.assert_allclose(res, res0, rtol=rtol)
+
+
+@pytest.mark.parametrize(
+    "adaptive_strategy",
+    [
+        pytest.param(None, id="non-adaptive"),
+        pytest.param({"kind": "sliding-tile", "tile-size": 5}, id="sliding-tile"),
+        pytest.param(
+            {"kind": "tile-interpolation", "tile-into": 2},
+            id="tile-interpolation",
+        ),
+    ],
+)
+def test_translational_symmetry(adaptive_strategy, subtests):
+    IMAGE_SHAPE = (16, 16)
+    prng = np.random.default_rng(0)
+    image = prng.normal(size=np.prod(IMAGE_SHAPE)).reshape(IMAGE_SHAPE)
+
+    heq = partial(
+        ahe.equalize_histogram,
+        nbins=8,
+        adaptive_strategy=adaptive_strategy,
+        boundaries="periodic",
+    )
+    res0 = heq(image)
+    match adaptive_strategy:
+        case None | {"kind": "sliding-tile"}:
+            shifts = [1, 2, 5, 15, 16, 17]
+        case {"kind": "tile-interpolation"}:
+            # tile interpolation only has a discrete translational symmetry:
+            # shifting by a multiple of the tile size
+            shifts = [8, 16, 32]
+        case _ as _unreachable:
+            raise AssertionError
+
+    for sy, sx in product(shifts, shifts):
+        with subtests.test(shifts=(sy, sx)):
+            res = np.roll(
+                heq(np.roll(image, shift=(sy, sx), axis=(0, 1))),
+                shift=(-sx, -sy),
+                axis=(1, 0),
+            )
+            npt.assert_array_equal(res, res0)
