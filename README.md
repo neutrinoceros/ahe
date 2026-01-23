@@ -77,8 +77,9 @@ are computed and applied.
 
 True AHE is intrinsically an expensive operation to perform, as it requires computing
 a different histogram *per pixel*. The most efficient way to accomplish this, originally
-proposed by Fizer et al (1987), minimises the redundancy of intermediate steps in computations and is known as the sliding-tile variant of AHE.
-Here's how to use it in `ahe`
+proposed by [Pizer et al. (1987)](#references), minim‡ises the redundancy of intermediate
+steps in computations and is known as the sliding-tile variant of AHE. Here's how to use
+it in `ahe`
 
 ```python
 image_eq = ahe.equalize_histogram(
@@ -100,7 +101,7 @@ While an exact implementation of AHE, this algorithm remains resource-demanding.
 
 Alternatively, very similar results can be obtained at a fraction of the cost using
 an approximative method known as the tile-interpolation variant of AHE, also
-introduced by Fizer et al (1987).
+introduced by [Pizer et al. (1987)](#references).
 In this method, an image is split into equal-sized sub domains (tiles), which may be
 specified either from a tile size
 
@@ -190,3 +191,8 @@ strategy only supports tiles and images with even sizes in both directions.
 ### How
 > [!IMPORTANT]
 > TODO
+
+
+## References
+
+1. Pizer, Stephen M. et al. (1987). Adaptive Histogram Equalization and Its Variations. *Compute Vizion, Graphics, and Image Processing*, 39, 355-368
