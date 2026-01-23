@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 - FEAT: add support for all-directions periodic boundary conditions
+- BUG: prevent a rust panic when input image contains non-finite (inf, NaN) values,
+       raise a clear Python exception instead.
 - DOC: prefer light-themes graphs when undetermined (improve PyPI rendering)
 - DOC: document technical differences with `scikit-image`, other than binary size and performance
 - DOC: add usage examples to narrative documentation

@@ -165,6 +165,11 @@ def equalize_histogram(
             f"Found unsupported data type: {image.dtype}. "
             f"Expected of of {_SUPPORTED_DTYPES}."
         )
+    if np.any(~np.isfinite(image)):
+        raise ValueError(
+            "Image contains infinite values or NaNs, none of which are supported."
+        )
+
     pad_mode: Literal["reflect", "wrap"]
     match boundaries:
         case "reflect":
