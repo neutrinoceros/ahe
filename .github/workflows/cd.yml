@@ -26,7 +26,7 @@ jobs:
       with:
         enable-cache: false
     - name: Pre-publication checks
-      run: uv run scripts/pre_publish_checks.py
+      run: uv run --no-project scripts/pre_publish_checks.py
 
   build-sdist:
     name: Build source distribution
