@@ -76,10 +76,10 @@ are computed and applied.
 #### Prioritizing accuracy: sliding-tile
 
 True AHE is intrinsically an expensive operation to perform, as it requires computing
-a different histogram *per pixel*. The most efficient way to accomplish this, originally
-proposed by [Pizer et al. (1987)](#references), minimises the redundancy of intermediate
-steps in computations and is known as the sliding-tile variant of AHE. Here's how to use
-it in `ahe`
+a different histogram *per pixel*. The least inefficient way to accomplish this,
+originally proposed by [Pizer et al. (1987)](#references), reduces the redundancy in
+intermediate computations and is known as the sliding-tile variant of AHE.
+Here's how to use it in `ahe`
 
 ```python
 image_eq = ahe.equalize_histogram(
@@ -95,7 +95,8 @@ image_eq = ahe.equalize_histogram(
 > This strategy requires odd-sized tile shapes, but supports
 > image shapes with any parity.
 
-While an exact implementation of AHE, this algorithm remains resource-demanding.
+While an exact implementation of AHE, this option remains resource-demanding and is
+not recommended for production.
 
 #### Prioritizing performance: tile-interpolation
 
