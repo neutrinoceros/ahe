@@ -359,3 +359,14 @@ class TestRegressions:
         )
         assert res is not image
         npt.assert_array_equal(res, image)
+
+
+def test_non_finite_values(subtests):
+    image = np.ones((128, 256), dtype="float64")
+    msg = r"^Image contains infinite values or NaNs, none of which are supported\.$"
+
+    for outlier, val in {"NaN": np.nan}.items():
+        test_double = image.copy()
+        test_double[5, 200] = val
+        with subtests.test(outlier=outlier), pytest.raises(ValueError, match=msg):
+            ahe.equalize_histogram(test_double)
