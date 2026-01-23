@@ -13,7 +13,7 @@ def main() -> int:
         return 1
 
     sdist = sdist_files[0]
-    if (size := sdist.stat().st_size) > (max_size := 65_000):
+    if (size := sdist.stat().st_size) > (max_size := 50_000):
         print(
             f"Source distribution size ({size:_}) exceeds expected limit ({max_size:_})",
             file=sys.stderr,
