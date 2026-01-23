@@ -38,7 +38,7 @@ jobs:
     - name: Check build
       run: uv build
     - name: Check sdist's size
-      run: uv run scripts/check_sdist.py
+      run: uv run --no-project scripts/check_sdist.py
 
   pre-publication-checks:
     runs-on: ubuntu-latest
@@ -52,7 +52,7 @@ jobs:
       with:
         enable-cache: false
     - name: Pre-publication checks
-      run: uv run scripts/pre_publish_checks.py
+      run: uv run --no-project scripts/pre_publish_checks.py
 
   lint-rust:
     runs-on: ubuntu-latest
