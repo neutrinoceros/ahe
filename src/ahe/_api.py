@@ -278,7 +278,7 @@ class TileInterpolation:
         # the padded image should be (in every direction):
         # - an integral multiple of the tile size
         # - as small as possible
-        # further more, the pad_width must be at least the size of a single tile
+        # further more, the pad_width must be at least half the size of a single tile
         if self.tile_shape is None:
             raise AssertionError
         if any(s % 2 for s in image_shape):
@@ -295,11 +295,11 @@ class TileInterpolation:
         sh = image_shape
 
         pw = (
-            (ceil(sh[0] / ts[0] + 2) * ts[0] - sh[0]) // 2,
-            (ceil(sh[1] / ts[1] + 2) * ts[1] - sh[1]) // 2,
+            (ceil(sh[0] / ts[0] + 1) * ts[0] - sh[0]) // 2,
+            (ceil(sh[1] / ts[1] + 1) * ts[1] - sh[1]) // 2,
         )
         assert not (sh[0] + 2 * pw[0]) % ts[0]
         assert not (sh[1] + 2 * pw[1]) % ts[1]
-        assert pw[0] >= ts[0]
-        assert pw[1] >= ts[1]
+        assert pw[0] >= ts[0] // 2
+        assert pw[1] >= ts[1] // 2
         return ((pw[0], pw[0]), (pw[1], pw[1]))

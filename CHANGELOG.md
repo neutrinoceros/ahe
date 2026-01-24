@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 - DOC: add a graph showcasing a comparison of performance with `scikit-image`
+- ENH: reduce padding used in tile-interpolation AHE to half a tile instead of a full one
 
 ## 0.0.3 - 2026-01-23
 

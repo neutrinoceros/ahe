@@ -10,7 +10,11 @@ import ahe
 
 BENCHMARK_DIR = Path(__file__).parent
 
-image = np.load(BENCHMARK_DIR / "img.npy")
+SHAPE = 2028, 2048
+prng = np.random.default_rng(0)
+image = np.clip(
+    prng.normal(loc=0.0, scale=0.25, size=np.prod(SHAPE)), a_min=-1.0, a_max=1.0
+).reshape(SHAPE)  # np.load(BENCHMARK_DIR / "img.npy")
 
 
 def loop(func, n: int):

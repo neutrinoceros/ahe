@@ -1,10 +1,10 @@
 {
   "simple": {
-    "scikit-image": 865531083,
-    "ahe": 129451083
+    "scikit-image": 18303629583,
+    "ahe": 1930802250
   },
   "adaptive": {
-    "scikit-image": 1047726542,
-    "ahe": 816944625
+    "scikit-image": 13859113958,
+    "ahe": 7044515333
   }
 }

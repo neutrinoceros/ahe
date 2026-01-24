@@ -106,7 +106,7 @@ def plot_benchmark(theme: Literal["light", "dark"]) -> None:
         ax.set_title(kind, loc="left")
 
     axs[1].set(xlabel="runtime (ms)")
-    fig.suptitle("Adjusting contrast on a 500x500 image")
+    fig.suptitle("Adjusting contrast on a 2048x2048 image")
 
     save(fig, fname=f"benchmark-{theme}")
 
