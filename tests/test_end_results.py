@@ -192,8 +192,11 @@ def test_historgram_equalization_tile_interpolation_ref_impl(dtype):
             "tile-size": TILE_SIZE,
         },
     )
-    npt.assert_allclose(
-        res_ti[: IMAGE_SHAPE[0] - 1, : IMAGE_SHAPE[1] - 1],
-        ref[: IMAGE_SHAPE[0] - 1, : IMAGE_SHAPE[1] - 1],
-        rtol=2.2,
-    )
+    # since *exact* reproduction is excluded, and considering that equalize_adapthist
+    # poorly handles clip_limit=0.0 anyway, assertions are best performed on stastical
+    # properties instead of individual pixels.
+    diff = (res_ti - ref)[: IMAGE_SHAPE[0] - 1, : IMAGE_SHAPE[1] - 1]
+    mean = np.mean(diff)
+    assert mean == pytest.approx(0.0, abs=0.025)
+    std = np.std(diff, mean=mean)
+    assert std < 0.10

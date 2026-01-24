@@ -145,8 +145,17 @@ illustrated above.
 ### Why
 
 Put simply, if all your project needs from `scikit-image` is
-`skimage.exposure.equalize_(adapt)hist`, `ahe` provides a much more lightweight
-and portable replacement.
+`skimage.exposure.equalize_(adapt)hist`, `ahe` provides a faster, more lightweight and
+portable replacement.
+
+<!-- Generated with `uv run scripts/doc_graphs.py` -->
+<p align="center">
+  <picture align="center">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/neutrinoceros/ahe/main/assets/benchmark-dark.svg" width="900">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/neutrinoceros/ahe/main/assets/benchmark-light.svg" width="900">
+    <img alt="Shows a bar chart comparing wheel sizes" src="https://raw.githubusercontent.com/neutrinoceros/ahe/main/assets/benchmark-light.svg" width="900">
+  </picture>
+</p>
 
 `ahe` has no runtime dependencies beyond `numpy`. Additionally, its binaries are
 orders of magnitude lighter than `scikit-image`'s, as well as future-compatible
@@ -183,10 +192,6 @@ strategy only supports tiles and images with even sizes in both directions.
 
 `ahe.equalize_histogram` also supports periodic boundary conditions, which can be
 specified as `boundaries='periodic'`.
-
-> [!IMPORTANT]
-> TODO
->- better performance
 
 ### How
 > [!IMPORTANT]

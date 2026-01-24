@@ -63,9 +63,9 @@ def test_resolve_pad_width_tile_interpolation_odd_image(image_shape):
     [
         (SlidingTile(tile_shape=(3, 3)), (4, 4), ((1, 1), (1, 1))),
         (SlidingTile(tile_shape=(5, 5)), (5, 6), ((2, 2), (2, 2))),
-        (TileInterpolation(tile_shape=(2, 2)), (4, 4), ((2, 2), (2, 2))),
-        (TileInterpolation(tile_shape=(4, 4)), (4, 4), ((4, 4), (4, 4))),
-        (TileInterpolation(tile_shape=(2, 4)), (8, 8), ((2, 2), (4, 4))),
+        (TileInterpolation(tile_shape=(2, 2)), (4, 4), ((1, 1), (1, 1))),
+        (TileInterpolation(tile_shape=(4, 4)), (4, 4), ((2, 2), (2, 2))),
+        (TileInterpolation(tile_shape=(2, 4)), (8, 8), ((1, 1), (2, 2))),
     ],
 )
 def test_resolve_pad_width(strat, image_shape, expected):

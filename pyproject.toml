@@ -64,9 +64,10 @@ module-name = "ahe._core"
 python-packages = ["ahe"]
 python-source = "src"
 exclude = [
+    "assets/*",
+    "benchmark/*",
     "scratch/*",
     "scripts/*",
-    "static/*",
     "uv.lock",
     ".*",
 ]
@@ -81,7 +82,7 @@ addopts = ["-ra"]
 filterwarnings = [
   "error",
 ]
-norecursedirs = ["scripts", "dist"]
+norecursedirs = ["benchmark", "scripts", "dist"]
 
 [tool.coverage.run]
 branch = true
@@ -131,6 +132,7 @@ select = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["D"]
+"benchmark/*" = ["D"]
 "scripts/*" = ["D"]
 
 [tool.ruff.lint.pydocstyle]
