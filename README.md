@@ -160,9 +160,12 @@ missing from `ahe`:
 - [contrast limitation](https://github.com/neutrinoceros/ahe/issues/6)
 - [masking](https://github.com/neutrinoceros/ahe/issues/51)
 - multi-channel images objects (from `PIL`) or arrays. The expectation is that this
-  should be easy to re-implement on the user side. Please open an issue if you'd like
-  native integration in `ahe`
+  should be easy to re-implement on the user side.
+- higher dimensionality: `ahe` currently only supports 2D input and outputs. The
+  algorithms can be generalized to work in any dimensionality. Please open an issue
 
+Some, though not all of the above are already planned. Don't hesitate to request
+the others (or anything else that could be in scope) by opening an issue.
 
 ## Dependency Minimalism
 
