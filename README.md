@@ -74,9 +74,9 @@ are computed and applied.
 #### Prioritizing accuracy: sliding-tile
 
 True AHE is intrinsically an expensive operation to perform, as it requires computing
-a different histogram *per pixel*. The least inefficient way to accomplish this,
-originally proposed by [Pizer et al. (1987)](#references), reduces the redundancy in
-intermediate computations and is known as the sliding-tile variant of AHE.
+a different histogram *per pixel*. One efficient (although still costly) way to
+accomplish this, originally proposed by [Pizer et al. (1987)](#references), reduces the
+redundancy in intermediate computations and is known as the sliding-tile variant of AHE.
 Here's how to use it in `ahe`
 
 ```python
