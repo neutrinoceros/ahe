@@ -344,10 +344,14 @@ class TestBoundaries:
 class TestRegressions:
     IMAGE_SHAPE = (128, 256)
 
-    def test_uniform_image(self, adaptive_strategy):
+    @pytest.mark.parametrize("max_normalized_bincount", [1.0, 0.5])
+    def test_uniform_image(self, adaptive_strategy, max_normalized_bincount):
         image = np.ones(self.IMAGE_SHAPE, dtype="float64")
         res = ahe.equalize_histogram(
-            image, nbins=8, adaptive_strategy=adaptive_strategy
+            image,
+            nbins=8,
+            adaptive_strategy=adaptive_strategy,
+            max_normalized_bincount=max_normalized_bincount,
         )
         assert res is not image
         npt.assert_array_equal(res, image)
@@ -370,3 +374,17 @@ def test_non_finite_values(subtests):
         test_double[5, 200] = val
         with subtests.test(outlier=outlier), pytest.raises(ValueError, match=msg):
             ahe.equalize_histogram(test_double)
+
+
+@pytest.mark.parametrize(
+    "val", [-1.0, 0.0, float("-inf"), float("nan"), 2.0, float("inf")]
+)
+def test_invalid_max_normalized_bincount(val):
+    with pytest.raises(
+        ValueError,
+        match=(
+            rf"max_normalized_bincount={val} is invalid: "
+            r"expected a value within ]0, 1]"
+        ),
+    ):
+        ahe.equalize_histogram(np.ones((10, 10)), max_normalized_bincount=val)

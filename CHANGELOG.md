@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+- FEAT: add support for contrast limitation through the `max_normalized_bincount`
+  keyword argument
 - ENH: reduce padding used in tile-interpolation AHE to half a tile instead of a full one
 - DOC: add a graph showcasing a comparison of performance with `scikit-image`
 - DOC: complete migration guide
