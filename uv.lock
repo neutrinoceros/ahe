@@ -25,6 +25,7 @@ covcheck = [
     { name = "runtime-introspect" },
 ]
 impl-comp = [
+    { name = "clahe" },
     { name = "scikit-image", version = "0.25.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "scikit-image", version = "0.26.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
 ]
@@ -53,7 +54,10 @@ covcheck = [
     { name = "pytest", specifier = ">=9.0.0" },
     { name = "runtime-introspect", specifier = ">=0.3.0" },
 ]
-impl-comp = [{ name = "scikit-image", specifier = ">=0.25.2" }]
+impl-comp = [
+    { name = "clahe", specifier = ">=0.1" },
+    { name = "scikit-image", specifier = ">=0.25.2" },
+]
 test = [
     { name = "pytest", specifier = ">=9.0.0" },
     { name = "runtime-introspect", specifier = ">=0.3.0" },
@@ -76,6 +80,16 @@ sdist = { url = "https://files.pythonhosted.org/packages/0c/b0/fbba81ea29eed1274
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ad/d6/6b33bb49f08d761d7c958a1e3cecfb3ffbdcf4ba6bbed65b23ab47516b75/basedpyright-1.37.1-py3-none-any.whl", hash = "sha256:caf3adfe54f51623241712f8b4367adb51ef8a8c2288e3e1ec4118319661340d", size = 12297397, upload-time = "2026-01-08T14:42:50.306Z" },
 ]
+
+[[package]]
+name = "clahe"
+version = "0.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "numpy", version = "2.4.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ce/9b/92d75f5fa56caf9e97803f147c26922df57791ddf134bfa0bea3bc74a118/clahe-0.1.tar.gz", hash = "sha256:efa108984535fc3645044a0073c873ce7fe7954e0cd9c30ea4e6014c582efe0d", size = 176837, upload-time = "2019-09-28T20:23:44.191Z" }
 
 [[package]]
 name = "colorama"
