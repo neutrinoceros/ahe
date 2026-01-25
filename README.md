@@ -198,7 +198,7 @@ excluded from this graph)
 `scikit-image`'s implementation of histogram equalization methods are exposed as two
 different functions: `skimage.exposure.equalize_hist` and
 `skimage.exposure.equalize_adapthist`. Only the former supports masking, and only the
-latter support clipping. `ahe.equalize_histogram` provides a consistent feature set,
+latter supports clipping. `ahe.equalize_histogram` provides a consistent feature set,
 independent of the adaptive strategy (or lack thereof) selected.
 
 Furthermore, implicit, default behavior can be hard to reproduce explicitly. For
