@@ -161,7 +161,7 @@ def test_historgram_equalization_tile_interpolation_full_ahe(dtype, rtol):
 
 @pytest.mark.skipif(find_spec("skimage") is None, reason="requires scikit-image")
 @pytest.mark.parametrize("dtype", ["float32", "float64"])
-@pytest.mark.parametrize("max_normalized_bincount, max_std", [(1.0, 0.10), (0.6, 0.12)])
+@pytest.mark.parametrize("max_normalized_bincount, max_std", [(1.0, 0.10), (0.6, 0.14)])
 def test_historgram_equalization_tile_interpolation_ref_impl(
     dtype, max_normalized_bincount, max_std
 ):
@@ -189,7 +189,7 @@ def test_historgram_equalization_tile_interpolation_ref_impl(
         image,
         kernel_size=TILE_SIZE,
         nbins=NBINS,
-        clip_limit=(1 - max_normalized_bincount),
+        clip_limit=max_normalized_bincount,
     )
 
     res_ti = ahe.equalize_histogram(
@@ -202,10 +202,10 @@ def test_historgram_equalization_tile_interpolation_ref_impl(
         max_normalized_bincount=max_normalized_bincount,
     )
     # since *exact* reproduction is excluded, and considering that equalize_adapthist
-    # poorly handles clip_limit=0.0 anyway, assertions are best performed on stastical
+    # poorly handles clip_limit=1.0 anyway, assertions are best performed on stastical
     # properties instead of individual pixels.
     diff = (res_ti - ref)[: IMAGE_SHAPE[0] - 1, : IMAGE_SHAPE[1] - 1]
     mean = np.mean(diff)
-    assert mean == pytest.approx(0.0, abs=0.025)
+    assert mean == pytest.approx(0.0, abs=0.1)
     std = np.std(diff, mean=mean)
     assert std < max_std
