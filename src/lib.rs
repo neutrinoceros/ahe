@@ -2,6 +2,7 @@ use interpn::one_dim::linear::LinearHoldLast1D;
 use interpn::one_dim::Interp1D;
 use interpn::RegularGrid1D;
 use num_traits::{Float, NumCast, Signed};
+
 use numpy::borrow::PyReadonlyArray2;
 use numpy::ndarray::{s, Array1, Array2, ArrayView, ArrayView1, ArrayView2, Axis, Dimension};
 use numpy::{PyArray2, ToPyArray};
@@ -98,7 +99,10 @@ fn compute_subhistogram<T: AtLeastF32>(
     Histogram { bins, range }
 }
 
-fn reduce_histogram<T: Copy>(subhists: &VecDeque<Histogram<T>>) -> Histogram<T> {
+fn reduce_histogram<T: Copy>(
+    subhists: &VecDeque<Histogram<T>>,
+    max_bincount: usize,
+) -> Histogram<T> {
     // it is assumed that all input histograms have the exact same range and nbins
     let h0 = subhists.front().unwrap();
     let nbins = h0.bins.len();
@@ -108,6 +112,66 @@ fn reduce_histogram<T: Copy>(subhists: &VecDeque<Histogram<T>>) -> Histogram<T> 
             bins[i] += h.bins[i];
         }
     }
+    // contrast limitation -- histogram clipping
+
+    // 1. compute effective max_bincount (generally lower than input)
+    // see Pizer et al. (1987), Section 4.2, Program 3 (bisection)
+    let max_bincount = {
+        let mut top = max_bincount;
+        let mut bot = 0usize;
+        let mut excess: usize;
+        while (top - bot) > 1 {
+            let mid = (top + bot) / 2;
+            excess = 0;
+            for b in &bins {
+                excess += {
+                    if *b > mid {
+                        b - mid
+                    } else {
+                        0
+                    }
+                };
+            }
+            if excess > (max_bincount - mid) * nbins {
+                top = mid;
+            } else {
+                bot = mid;
+            }
+        }
+        // I'm intentionally returning top instead of bot(tom), as prescribed by
+        // Pizer et al. (1987), to avoid spurious clipping in perfectly uniform regions.
+        top
+    };
+    // compute excess one last time (don't reuse previous result as it may not be correct)
+    let mut excess = 0usize;
+    for b in &bins {
+        if *b > max_bincount {
+            excess += b - max_bincount;
+        };
+    }
+
+    if excess > 0 {
+        // 2. clip excess
+        for i in 0..nbins {
+            bins[i] = bins[i].max(max_bincount);
+        }
+
+        // 3. uniformly re-distribute excess
+        let r = excess % nbins;
+        let d = excess / nbins + {
+            // hack: prioritize exact uniformity (and simplicity of impl)
+            // over exact conservation of total bincount
+            if r > nbins / 2 {
+                1
+            } else {
+                0
+            }
+        };
+        for i in 0..nbins {
+            bins[i] += d;
+        }
+    }
+
     Histogram {
         bins,
         range: h0.range,
@@ -117,13 +181,14 @@ fn reduce_histogram<T: Copy>(subhists: &VecDeque<Histogram<T>>) -> Histogram<T> 
 fn compute_histogram<T: AtLeastF32 + numpy::Element + NumCast>(
     image: ArrayView2<T>,
     nbins: usize,
+    max_bincount: usize,
 ) -> Histogram<T> {
     let range = get_value_range(image);
     let mut subhistograms = VecDeque::with_capacity(image.shape()[0] + 1);
     for row in image.axis_iter(Axis(0)) {
         subhistograms.push_back(compute_subhistogram(row, range, nbins));
     }
-    reduce_histogram(&subhistograms)
+    reduce_histogram(&subhistograms, max_bincount)
 }
 
 #[cfg(test)]
@@ -185,9 +250,10 @@ fn equalize_histogram<'py, T: AtLeastF32 + numpy::Element>(
     py: Python<'py>,
     image: PyReadonlyArray2<'py, T>,
     nbins: usize,
+    max_bincount: usize,
 ) -> Bound<'py, PyArray2<T>> {
     let image = image.as_array();
-    let hist = compute_histogram(image, nbins);
+    let hist = compute_histogram(image, nbins, max_bincount);
     let mut out = Array2::<T>::zeros(image.raw_dim());
     adjust_intensity(image, hist, &mut out);
     out.to_pyarray(py)
@@ -264,6 +330,7 @@ fn equalize_histogram_sliding_tile<'py, T: AtLeastF32 + numpy::Element>(
     image: PyReadonlyArray2<'py, T>,
     nbins: usize,
     tile_shape: (usize, usize),
+    max_bincount: usize,
 ) -> Bound<'py, PyArray2<T>> {
     let image = image.as_array();
     let dims = ArrayDimensions {
@@ -355,7 +422,7 @@ fn equalize_histogram_sliding_tile<'py, T: AtLeastF32 + numpy::Element>(
             }
             assert_eq!(subhists.len(), tile_dims.y);
             if hist_reduction_needed {
-                hist = reduce_histogram(&subhists);
+                hist = reduce_histogram(&subhists, max_bincount);
                 cdf = hist.cdf_as_normalized();
                 cdf_grid = RegularGrid1D::new(
                     hist.first_bin_center(),
@@ -433,6 +500,7 @@ fn equalize_histogram_tile_interpolation<'py, T: AtLeastF32 + numpy::Element>(
     pimage: PyReadonlyArray2<'py, T>,
     nbins: usize,
     tile_shape: (usize, usize),
+    max_bincount: usize,
 ) -> Bound<'py, PyArray2<T>> {
     let pimage = pimage.as_array();
     let pdims = ArrayDimensions {
@@ -475,7 +543,7 @@ fn equalize_histogram_tile_interpolation<'py, T: AtLeastF32 + numpy::Element>(
                 },
             };
             let tile_view = get_tile_view(&pimage, vrange);
-            let hist = compute_histogram(tile_view, nbins);
+            let hist = compute_histogram(tile_view, nbins, max_bincount);
             let cdf = hist.cdf_as_normalized();
             let ii = InterpolatorInputs {
                 start: hist.first_bin_center(),
@@ -564,8 +632,9 @@ fn _core<'py>(_py: Python<'py>, m: &Bound<'py, PyModule>) -> PyResult<()> {
         py: Python<'py>,
         image: PyReadonlyArray2<'py, f32>,
         nbins: usize,
+        max_bincount: usize,
     ) -> Bound<'py, PyArray2<f32>> {
-        equalize_histogram(py, image, nbins)
+        equalize_histogram(py, image, nbins, max_bincount)
     }
     m.add_function(wrap_pyfunction!(equalize_histogram_f32, m)?)?;
 
@@ -574,8 +643,9 @@ fn _core<'py>(_py: Python<'py>, m: &Bound<'py, PyModule>) -> PyResult<()> {
         py: Python<'py>,
         image: PyReadonlyArray2<'py, f64>,
         nbins: usize,
+        max_bincount: usize,
     ) -> Bound<'py, PyArray2<f64>> {
-        equalize_histogram(py, image, nbins)
+        equalize_histogram(py, image, nbins, max_bincount)
     }
     m.add_function(wrap_pyfunction!(equalize_histogram_f64, m)?)?;
 
@@ -585,8 +655,9 @@ fn _core<'py>(_py: Python<'py>, m: &Bound<'py, PyModule>) -> PyResult<()> {
         image: PyReadonlyArray2<'py, f32>,
         nbins: usize,
         tile_shape: (usize, usize),
+        max_bincount: usize,
     ) -> Bound<'py, PyArray2<f32>> {
-        equalize_histogram_sliding_tile(py, image, nbins, tile_shape)
+        equalize_histogram_sliding_tile(py, image, nbins, tile_shape, max_bincount)
     }
     m.add_function(wrap_pyfunction!(equalize_histogram_sliding_tile_f32, m)?)?;
 
@@ -596,8 +667,9 @@ fn _core<'py>(_py: Python<'py>, m: &Bound<'py, PyModule>) -> PyResult<()> {
         image: PyReadonlyArray2<'py, f64>,
         nbins: usize,
         tile_shape: (usize, usize),
+        max_bincount: usize,
     ) -> Bound<'py, PyArray2<f64>> {
-        equalize_histogram_sliding_tile(py, image, nbins, tile_shape)
+        equalize_histogram_sliding_tile(py, image, nbins, tile_shape, max_bincount)
     }
     m.add_function(wrap_pyfunction!(equalize_histogram_sliding_tile_f64, m)?)?;
 
@@ -607,8 +679,9 @@ fn _core<'py>(_py: Python<'py>, m: &Bound<'py, PyModule>) -> PyResult<()> {
         image: PyReadonlyArray2<'py, f32>,
         nbins: usize,
         tile_shape: (usize, usize),
+        max_bincount: usize,
     ) -> Bound<'py, PyArray2<f32>> {
-        equalize_histogram_tile_interpolation(py, image, nbins, tile_shape)
+        equalize_histogram_tile_interpolation(py, image, nbins, tile_shape, max_bincount)
     }
     m.add_function(wrap_pyfunction!(
         equalize_histogram_tile_interpolation_f32,
@@ -621,8 +694,9 @@ fn _core<'py>(_py: Python<'py>, m: &Bound<'py, PyModule>) -> PyResult<()> {
         image: PyReadonlyArray2<'py, f64>,
         nbins: usize,
         tile_shape: (usize, usize),
+        max_bincount: usize,
     ) -> Bound<'py, PyArray2<f64>> {
-        equalize_histogram_tile_interpolation(py, image, nbins, tile_shape)
+        equalize_histogram_tile_interpolation(py, image, nbins, tile_shape, max_bincount)
     }
     m.add_function(wrap_pyfunction!(
         equalize_histogram_tile_interpolation_f64,

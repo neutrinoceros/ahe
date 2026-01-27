@@ -56,6 +56,10 @@ def _resolve_nbins(nbins: int | Literal["auto"], shape: Pair[int]) -> int:
         return nbins
 
 
+def _resolve_max_bincount(max_normalized_bincount: float, *, tile_size: int) -> int:
+    return max(1, int(max_normalized_bincount * tile_size))
+
+
 def equalize_histogram(
     image: ndarray[tuple[int, int], dtype[F]],
     /,
@@ -63,9 +67,9 @@ def equalize_histogram(
     nbins: int | Literal["auto"] = "auto",
     boundaries: Literal["reflect", "periodic"] = "reflect",
     adaptive_strategy: StrategySpec | None = None,
-    contrast_limitation: None = None,
+    max_normalized_bincount: float = 1.0,
 ) -> ndarray[tuple[int, int], dtype[F]]:
-    """Equalize histogram of a gray-scale image.
+    """(Contrast Limited) (Adaptive) Histogram Equalization for gray-scale images.
 
     Parameters
     ----------
@@ -97,9 +101,16 @@ def equalize_histogram(
         prevent left/right biases in the output. Furthermore, tile-interpolation is only
         supported for images with even sizes in both directions.
 
-    contrast_limitation: None, keyword-only
-      not implemented
-      https://github.com/neutrinoceros/rlic/issues/304
+    max_normalized_bincount: float, default is 1.0
+        should satisfy 0 < max_normalized_bincount <= 1.0
+        Set a value <1.0 to enable contrast limitation ((CL)(A)HE).
+        This value represents the maximum bincount, normalized by the number of pixels
+        in a tile. Values in excess of this threshold are re-distributed evenly over the
+        whole tile. For instance, max_normalized_bincount=0.01 means that any bin
+        totalling more that 1% of the pixels in a tile will be clipped.
+        Effectively, this factor limits the maximum enhancement of intensity
+        for any given pixel. Higher values result in higher contrast.
+        See Sec. 4.2 from reference [1] for details.
 
     Returns
     -------
@@ -156,10 +167,14 @@ def equalize_histogram(
     Both tile-size and tile-into will accept either a pair of integers (n, m) to
     distinguish sizes (or divisors, respectively) or a single integer n, as illustrated
     above, which is a shorthand for (n, n).
-    """
-    if contrast_limitation is not None:
-        raise NotImplementedError  # type: ignore
 
+    References
+    ----------
+    [1] Pizer, S. M. et al. (1987)
+        Adaptive Histogram Equalization and Its Variations.
+        Compute Vizion, Graphics, and Image Processing, 39, 355-368
+        DOI: 10.1016/S0734-189X(87)80186-X
+    """
     if image.dtype not in _SUPPORTED_DTYPES:
         raise TypeError(
             f"Found unsupported data type: {image.dtype}. "
@@ -182,6 +197,11 @@ def equalize_histogram(
                 "Expected 'reflect' or 'periodic'."
             )
 
+    if not (0 < max_normalized_bincount <= 1.0):
+        raise ValueError(
+            f"{max_normalized_bincount=} is invalid: expected a value within ]0, 1]"
+        )
+
     input_dtype = image.dtype
     if adaptive_strategy is None:
         if not image.flags.c_contiguous:
@@ -192,7 +212,7 @@ def equalize_histogram(
             # this type:ignore comment can be removed when Python 3.10 is dropped
             image = np.copy(image, order="C")  # type: ignore[assignment]
         histeq: Callable[
-            [ndarray[tuple[int, int], dtype[F]], int],
+            [ndarray[tuple[int, int], dtype[F]], int, int],
             ndarray[tuple[int, int], dtype[F]],
         ]
         if input_dtype == np.dtype("float32"):
@@ -202,7 +222,10 @@ def equalize_histogram(
         else:
             raise AssertionError
         nbins = _resolve_nbins(nbins, image.shape)
-        return histeq(image, nbins)
+        max_bincount = _resolve_max_bincount(
+            max_normalized_bincount, tile_size=image.size
+        )
+        return histeq(image, nbins, max_bincount)
 
     ahe_type: type[Strategy]
     match adaptive_strategy.get("kind", UNSET):
@@ -231,11 +254,14 @@ def equalize_histogram(
 
     pad_width = strat.resolve_pad_width(image.shape)
     pimage = np.pad(image, pad_width=pad_width, mode=pad_mode)
+    max_bincount = _resolve_max_bincount(
+        max_normalized_bincount, tile_size=ts[0] * ts[1]
+    )
 
     match strat:
         case SlidingTile():
             histeq_st: Callable[
-                [ndarray[tuple[int, int], dtype[F]], int, Pair[int]],
+                [ndarray[tuple[int, int], dtype[F]], int, Pair[int], int],
                 ndarray[tuple[int, int], dtype[F]],
             ]
             if input_dtype == np.dtype("float32"):
@@ -244,10 +270,10 @@ def equalize_histogram(
                 histeq_st = equalize_histogram_sliding_tile_f64  # type: ignore[assignment] # pyright: ignore[reportAssignmentType]
             else:
                 raise AssertionError
-            res = histeq_st(pimage, nbins, ts)  # type: ignore[arg-type]
+            res = histeq_st(pimage, nbins, ts, max_bincount)  # type: ignore[arg-type]
         case TileInterpolation():
             histeq_ti: Callable[
-                [ndarray[tuple[int, int], dtype[F]], int, Pair[int]],
+                [ndarray[tuple[int, int], dtype[F]], int, Pair[int], int],
                 ndarray[tuple[int, int], dtype[F]],
             ]
             if input_dtype == np.dtype("float32"):
@@ -256,7 +282,7 @@ def equalize_histogram(
                 histeq_ti = equalize_histogram_tile_interpolation_f64  # type: ignore[assignment] # pyright: ignore[reportAssignmentType]
             else:
                 raise AssertionError
-            res = histeq_ti(pimage, nbins, ts)  # type: ignore[arg-type]
+            res = histeq_ti(pimage, nbins, ts, max_bincount)  # type: ignore[arg-type]
         case _ as unreachable:  # pyright: ignore[reportUnnecessaryComparison]
             assert_never(unreachable)
 

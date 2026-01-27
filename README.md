@@ -15,11 +15,7 @@ a low-level implementation.
 > [!WARNING]
 > `ahe` is pre-alpha software
 
-`ahe` is developed in the open, but currently unstable.
-- contrast limitation, deemed an essential feature, is currently missing
-- documentation is incomplete
-- binaries are not published
-
+`ahe` is developed in the open, but not stable yet.
 
 ## Installation
 
@@ -147,17 +143,15 @@ above.
 
 ## Migrating from `scikit-image`
 
-## TL;DR
-
+### TL;DR
 Put simply, if all your project needs from `scikit-image` is
 `skimage.exposure.equalize_(adapt)hist`, `ahe` provides a faster, more lightweight and
-portable replacement.
+portable replacement. The following contains a much more detailed explanation of the
+differences. You can also jump to the final [Migration Guide](#migration-guide).
 
-## Disclaimer: missing features
-
+### Disclaimer: missing features
 The following features from `skimage.exposure.equalize_(adapt)hist` are currently
 missing from `ahe`:
-- [contrast limitation](https://github.com/neutrinoceros/ahe/issues/6)
 - [masking](https://github.com/neutrinoceros/ahe/issues/51)
 - multi-channel images objects (from `PIL`) or arrays. The expectation is that this
   should be easy to re-implement on the user side.
@@ -167,8 +161,7 @@ missing from `ahe`:
 Some, though not all of the above are already planned. Don't hesitate to request
 the others (or anything else that could be in scope) by opening an issue.
 
-## Dependency Minimalism
-
+### Dependency Minimalism
 `ahe` has no runtime dependencies beyond `numpy`. Additionally, its binaries are
 orders of magnitude lighter than `scikit-image`'s, as well as future-compatible
 with yet-unreleased versions of Python.
@@ -185,7 +178,7 @@ with yet-unreleased versions of Python.
 (*: `numpy` itself, as the common dependency to `ahe` and `scikit-image`, is
 excluded from this graph)
 
-## Better performance
+### Better performance
 <!-- Generated with `uv run scripts/doc_graphs.py` -->
 <p align="center">
   <picture align="center">
@@ -196,8 +189,7 @@ excluded from this graph)
 </p>
 
 
-## Interface Consistency
-
+### Interface Consistency
 `scikit-image`'s implementation of histogram equalization methods are exposed as two
 different functions: `skimage.exposure.equalize_hist` and
 `skimage.exposure.equalize_adapthist`. Only the former supports masking, and only the
@@ -217,19 +209,26 @@ the default, but with any other value than 8. In stark contrast,
 - `adaptive_strategy={'kind': 'tile-interpolation', 'tile-size': 64}` is akin to using
   `skimage.exposure.equalize_adapthist`'s `tile_size` argument.
 
-Last but not least, `skimage.exposure.equalize_adapthist`'s
-`clip_limit` defaults to `0.01` which is *almost* like "no clipping", though not
-*quite*, and things get messy when you actually want to disable clipping completely:
-- `clip_limit` is effectively a fraction, so only values between `0.0` and `1.0` are
-  significant, *but* `clip_limit=0.0` ("disable all clipping") and `clip_limit=1.0`
-  ("bins with more than 100% of the maximum possible bincount must be clipped") are
-  effectively equivalent, which makes the overall behavior harder to understand. Another
+Last but not least, `equalize_hist` does not support contrast limitation, while
+`equalize_adapthist` enables it by default (`clip_limit` defaults to `0.01`), and
+things get messy when you actually want to *disable* it:
+- `clip_limit`'s name is not descriptive and only makes sense if you already know what
+  it does under the hood. `ahe`'s equivalent parameter is named
+  `max_normalized_bincount`, which is more verbose, but also more explicit about what
+  the number represents.
+
+- `clip_limit` (a.k.a `max_normalized_bincount`) is effectively a fraction; only values
+  within the open interval `]0.0, 1.0]` are meaningful, *but* `clip_limit=0.0` is
+  *allowed*, and effectivaly disable all clipping, which means it's equivalent to `1.0`,
+  further mystifying the underlying behavior and meaning of the parameter. Another
   way to phrase this is that the results change discontinuously at `0.0`, which is very
   close to the default value *and* should be easy to reason about.
-- results for `clip_limit=0.0` (*or* `1.0`, as we just saw), are actually *incorrect* at
-  a level that is visible to the naked eye.
+- results for `clip_limit=1.0` (*or* `0.0`, as we just saw), are actually *incorrect* at
+  a level that is visible to the naked eye (aliasing may be prominent). In comparison,
+  `ahe` does not enable contrast limitation by default: such flagrant defects would be
+  immediately visible in tests.
 
-## Conservation of transformation invariants
+### Conservation of transformation invariants
 `ahe.equalize_histogram` also provides stricter guarantees regarding the
 transformation's geometric invariants.
 Outputs are guaranteed to be invariant (to machine precision) to left/right and top/
@@ -240,7 +239,7 @@ stricter requirements in `ahe.equalize_histogram`: the tile-interpolation strate
 supports tiles and images with even sizes in both directions.
 
 
-## Additional features
+### Additional features
 `ahe.equalize_histogram` supports more tiling scheme than
 `skimage.exposure.equalize_hist` and `skimage.exposure.equalize_adapthist` combined,
  within a consistent interface and a unified feature set.
@@ -253,6 +252,72 @@ but also a less accurate approximation of a true AHE.
 specified as `boundaries='periodic'`.
 
 
+### Migration Guide
+This section provides some practical examples of `scikit-image` applications and their
+equivalent in `ahe`.
+
+Notes
+- in `ahe`, the default `nbins` is *generally* aligned with `scikit-image`'s (256),
+  except for kernels (or tiles) spanning less than 256 pixels. For maximu compatibility,
+  specifying an explicit value is recommended.
+- `ahe.equalize_histogram`'s `max_normalized_bincount` represents the same parameter as
+  `skimage.exposure.equalize_adapthist`'s `clip_limit`, but their default values differ:
+  `max_normalized_bincount` defaults to `1.0` (no contrast limitation), while
+  `scikit-image`'s `clip_limit` default to `0.01`
+- "kernel", "tile" and "contextual region" are different names for the same concept.
+
+#### HE
+```python
+from skimage.exposure import equalize_hist
+
+result = equalize_hist(array)
+
+# becomes
+import ahe
+
+result = ahe.equalize_histogram(array, nbins=256)
+```
+
+#### AHE with implicit kernel size
+```python
+from skimage.exposure import equalize_adapthist
+
+result = equalize_adapthist(array, clip_limit=1.0)
+
+# becomes
+import ahe
+
+result = ahe.equalize_histogram(
+    array,
+    nbins=256,
+    adaptive_strategy={
+      "kind": "tile-interpolation",
+      "tile-into": 8, # or (8, 8)
+    },
+)
+```
+
+#### CLAHE with explicit kernel size
+```python
+from skimage.exposure import equalize_adapthist
+
+result = equalize_adapthist(array, kernel_size=64)
+
+# becomes
+import ahe
+
+result = ahe.equalize_histogram(
+    array,
+    nbins=256,
+    adaptive_strategy={
+      "kind": "tile-interpolation",
+      "tile-size": 64, # or (64, 64)
+    },
+    max_normalized_bincount=0.01,
+)
+```
+
 ## References
 
-1. Pizer, Stephen M. et al. (1987). Adaptive Histogram Equalization and Its Variations. *Compute Vizion, Graphics, and Image Processing*, 39, 355-368
+1. Pizer, Stephen M. et al. (1987). Adaptive Histogram Equalization and Its Variations.
+  *Compute Vizion, Graphics, and Image Processing*, 39, 355-368
