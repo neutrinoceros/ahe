@@ -1,13 +1,13 @@
 [project]
 name = "ahe"
-version = "0.0.3"
+version = "0.1.0"
 description = "(Adaptive) Histogram Equalization library for Python, written in Rust"
 license = "GPL-3.0-only"
 license-files = ["LICENSE"]
 authors = [ { name = "C.M.T Robert" } ]
 classifiers = [
     "Intended Audience :: Science/Research",
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 3 - Alpha",
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS",
     "Operating System :: Microsoft :: Windows",
