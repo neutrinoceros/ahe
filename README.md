@@ -10,6 +10,32 @@ A minimalist Python library for Adaptive Histogram Equalization,
 combining the expressiveness of a user-friendly Python interface with the raw power of
 a low-level implementation.
 
+<!-- TOC -->
+
+- [Development status](#development-status)
+- [Installation](#installation)
+- [Usage](#usage)
+    - [Simple Histogram Equalization](#simple-histogram-equalization)
+    - [Adaptive Histogram equalization AHE](#adaptive-histogram-equalization-ahe)
+        - [Prioritizing accuracy: sliding-tile](#prioritizing-accuracy-sliding-tile)
+        - [Prioritizing performance: tile-interpolation](#prioritizing-performance-tile-interpolation)
+    - [General rules for tiling schemes](#general-rules-for-tiling-schemes)
+- [Migrating from scikit-image](#migrating-from-scikit-image)
+    - [TL;DR](#tldr)
+    - [Disclaimer: missing features](#disclaimer-missing-features)
+    - [Dependency Minimalism](#dependency-minimalism)
+    - [Better performance](#better-performance)
+    - [Interface Consistency](#interface-consistency)
+    - [Conservation of transformation invariants](#conservation-of-transformation-invariants)
+    - [Additional features](#additional-features)
+    - [Migration Guide](#migration-guide)
+        - [HE](#he)
+        - [AHE with implicit kernel size](#ahe-with-implicit-kernel-size)
+        - [CLAHE with explicit kernel size](#clahe-with-explicit-kernel-size)
+- [References](#references)
+
+<!-- /TOC -->
+
 ## Development status
 
 > [!WARNING]
