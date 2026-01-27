@@ -115,10 +115,6 @@ image_eq = ahe.equalize_histogram(
 While an exact implementation of AHE, this option remains resource-demanding and is
 not recommended for production.
 
-> [!IMPORTANT]
-> There's a known defect with some edge cases
-> https://github.com/neutrinoceros/ahe/issues/50
-
 #### Prioritizing performance: tile-interpolation
 
 Alternatively, very similar results can be obtained at a fraction of the cost using
