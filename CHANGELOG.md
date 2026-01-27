@@ -4,11 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 0.1.0 - 2026-01-27
+
+This is the first alpha version.
 
 - FEAT: add support for contrast limitation through the `max_normalized_bincount`
   keyword argument
 - ENH: reduce padding used in tile-interpolation AHE to half a tile instead of a full one
+- WHL: wheels (pre-compiled binaries) are now published to PyPI
 - DOC: add a graph showcasing a comparison of performance with `scikit-image`
 - DOC: complete migration guide
 

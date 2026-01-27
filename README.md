@@ -3,7 +3,7 @@
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 
 
-A minimalist Python library for Adaptive Histogram Equalization,
+A minimalist Python library for (Contrast Limited) (Adaptive) Histogram Equalization,
 combining the expressiveness of a user-friendly Python interface with the raw power of
 a low-level implementation.
 
@@ -35,16 +35,10 @@ a low-level implementation.
 
 ## Development status
 
-> [!WARNING]
-> `ahe` is pre-alpha software
-
-`ahe` is developed in the open, but not stable yet.
+`ahe` is currently in alpha. Fundational features are available, and expected to be
+stable, but the software as a whole may not be feature complete yet.
 
 ## Installation
-
-> [!WARNING]
-> pre-built binaries (wheels) are not published at this stage.
-> A rust compiler toolchain is needed in order to install this package.
 
 ```
 $ python -m pip install ahe
