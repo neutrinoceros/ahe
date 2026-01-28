@@ -35,6 +35,10 @@ dependencies = [
 file = "README.md"
 content-type = "text/markdown"
 
+[project.urls]
+Homepage = "https://github.com/neutrinoceros/ahe"
+Changelog = "https://github.com/neutrinoceros/ahe/blob/main/CHANGELOG.md"
+
 [build-system]
 requires = ["maturin>=1.0,<2.0"]
 build-backend = "maturin"
