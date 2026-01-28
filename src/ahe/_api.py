@@ -18,10 +18,10 @@ from typing import Literal, Protocol, TypeAlias, TypedDict, TypeVar, final
 from ahe._typing import UNSET, Pair, PairSpec, UnsetType
 
 if sys.version_info >= (3, 11):
-    from typing import NotRequired, Self, assert_never
+    from typing import Self, assert_never
 else:
     from exceptiongroup import ExceptionGroup
-    from typing_extensions import NotRequired, Self, assert_never
+    from typing_extensions import Self, assert_never
 
 SUPPORTED_AHE_KINDS = frozenset({"sliding-tile", "tile-interpolation"})
 StrategyKind: TypeAlias = Literal["sliding-tile", "tile-interpolation"]
@@ -30,16 +30,24 @@ StrategyKind: TypeAlias = Literal["sliding-tile", "tile-interpolation"]
 SlidingTileSpec = TypedDict(
     "SlidingTileSpec", {"kind": Literal["sliding-tile"], "tile-size": PairSpec[int]}
 )
-TileInterpolationSpec = TypedDict(
-    "TileInterpolationSpec",
+TileInterpolationIntoSpec = TypedDict(
+    "TileInterpolationIntoSpec",
     {
         "kind": Literal["tile-interpolation"],
-        "tile-into": NotRequired[PairSpec[int]],
-        "tile-size": NotRequired[PairSpec[int]],
+        "tile-into": PairSpec[int],
+    },
+)
+TileInterpolationSizeSpec = TypedDict(
+    "TileInterpolationSizeSpec",
+    {
+        "kind": Literal["tile-interpolation"],
+        "tile-size": PairSpec[int],
     },
 )
 
-StrategySpec: TypeAlias = SlidingTileSpec | TileInterpolationSpec
+StrategySpec: TypeAlias = (
+    SlidingTileSpec | TileInterpolationIntoSpec | TileInterpolationSizeSpec
+)
 
 
 def as_pair(s: PairSpec[int], /) -> Pair[int]:

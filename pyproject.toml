@@ -28,7 +28,7 @@ requires-python = ">=3.10" # keep in sync with pyo3 (Cargo.toml)
 dependencies = [
     "exceptiongroup>=1.0.0 ; python_full_version < '3.11'", # keep in sync with typecheck dep group
     "numpy>=1.22.0",
-    "typing-extensions>=4.1.0 ; python_full_version < '3.11'",
+    "typing-extensions>=4.1.0 ; python_full_version < '3.11'", # 4.1.0+ is needed for assert_never
 ]
 
 [project.readme]
