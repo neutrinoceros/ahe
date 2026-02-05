@@ -102,6 +102,9 @@ exclude_also = [
     "^\\s*case _ as _?unreachable:",
 ]
 
+[tool.ty.rules]
+unused-type-ignore-comment = "ignore"
+
 [tool.pyright]
 reportImplicitStringConcatenation = false
 reportUnnecessaryTypeIgnoreComment = false # todo: drop this when Python 3.10 is EOL
