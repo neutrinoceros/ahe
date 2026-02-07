@@ -207,20 +207,22 @@ excluded from this graph)
 different functions: `skimage.exposure.equalize_hist` and
 `skimage.exposure.equalize_adapthist`. Only the former supports masking, and only the
 latter supports clipping. `ahe.equalize_histogram` provides a consistent feature set,
-independent of the adaptive strategy (or lack thereof) selected.
+independent of the adaptive strategy selected, or lack thereof.
 
 Furthermore, implicit, default behavior can be hard to reproduce explicitly. For
 instance, `equalize_adapthist` will, by default, create tiles by dividing the image in 8
-along each direction, but only exposes a `tile_size` argument to override this; as a
+along each direction, but only exposes a `kernel_size` argument to override this; as a
 result, one needs to re-implement division logic if they need something very similar to
-the default, but with any other value than 8. In stark contrast,
-`ahe.equalize_histogram`'s `adaptive_strategy` argument supports all these applications:
-- `adaptive_strategy=None` corresponds to `skimage.exposure.equalize_hist`
+the default, but with any other value than 8.
+
+In stark contrast, `ahe.equalize_histogram`'s `adaptive_strategy` argument supports all
+these applications:
+- `adaptive_strategy=None` (default) corresponds to `skimage.exposure.equalize_hist`
 - `adaptive_strategy={'kind': 'tile-interpolation', 'tile-into': 8}` corresponds to
   `skimage.exposure.equalize_adapthist`'s default, but the exact divisor(s) used can
    easily be adjusted
 - `adaptive_strategy={'kind': 'tile-interpolation', 'tile-size': 64}` is akin to using
-  `skimage.exposure.equalize_adapthist`'s `tile_size` argument.
+  `skimage.exposure.equalize_adapthist`'s `kernel_size` argument.
 
 Last but not least, `equalize_hist` does not support contrast limitation, while
 `equalize_adapthist` enables it by default (`clip_limit` defaults to `0.01`), and
@@ -229,10 +231,9 @@ things get messy when you actually want to *disable* it:
   it does under the hood. `ahe`'s equivalent parameter is named
   `max_normalized_bincount`, which is more verbose, but also more explicit about what
   the number represents.
-
 - `clip_limit` (a.k.a `max_normalized_bincount`) is effectively a fraction; only values
   within the open interval `]0.0, 1.0]` are meaningful, *but* `clip_limit=0.0` is
-  *allowed*, and effectivaly disable all clipping, which means it's equivalent to `1.0`,
+  *allowed*, and effectively disable all clipping, which means it's equivalent to `1.0`,
   further mystifying the underlying behavior and meaning of the parameter. Another
   way to phrase this is that the results change discontinuously at `0.0`, which is very
   close to the default value *and* should be easy to reason about.
