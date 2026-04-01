@@ -44,7 +44,7 @@ jobs:
     - name: Build sdist
       run: uv build --sdist
     - name: Upload sdist
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: sdist
         path: dist/*.tar.gz
@@ -102,7 +102,7 @@ jobs:
         uv pip install ahe --no-index --find-links dist --no-deps
         uv run --no-sync pytest --color=yes
     - name: Upload wheels
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: wheels-mac-intel
         path: dist
@@ -130,7 +130,7 @@ jobs:
         uv pip install ahe --no-index --find-links dist --no-deps
         uv run --no-sync pytest --color=yes
     - name: Upload wheels
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: wheels-mac-arm64
         path: dist
@@ -169,7 +169,7 @@ jobs:
         uv pip install ahe --no-index --find-links dist --no-deps
         uv run --no-sync pytest --color=yes
     - name: Upload wheels
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: wheels-win-${{ matrix.target }}
         path: dist
@@ -205,7 +205,7 @@ jobs:
         uv pip install ahe --no-index --find-links dist --no-deps
         uv run --no-sync pytest --color=yes
     - name: Upload wheels
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: wheels-win-arm64
         path: dist
@@ -246,7 +246,7 @@ jobs:
         uv pip install ahe --no-index --find-links dist --no-deps
         uv run --no-sync pytest --color=yes
     - name: Upload wheels
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: wheels-manylinux-${{ matrix.target }}
         path: dist
@@ -275,7 +275,7 @@ jobs:
         manylinux: musllinux_1_2
         args: --release --out dist
     - name: Upload wheels
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: wheels-musllinux-${{ matrix.target }}
         path: dist
