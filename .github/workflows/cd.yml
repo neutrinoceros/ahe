@@ -89,7 +89,7 @@ jobs:
       run: |
         echo "UV_PYTHON_PREFERENCE=only-managed" >> $GITHUB_ENV
 
-    - uses: dtolnay/rust-toolchain@stable # zizmor: ignore[unpinned-uses]
+    - run: rustup update
     - name: Build wheels - x86_64
       uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
       with:
@@ -117,7 +117,7 @@ jobs:
       with:
         python-version: '3.10'
         enable-cache: false
-    - uses: dtolnay/rust-toolchain@stable # zizmor: ignore[unpinned-uses]
+    - run: rustup update
     - name: Build wheels - arm64
       uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
       with:
@@ -153,7 +153,7 @@ jobs:
     - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
       with:
         enable-cache: false
-    - uses: dtolnay/rust-toolchain@stable # zizmor: ignore[unpinned-uses]
+    - run: rustup update
     - name: Build wheels
       uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
       with:
@@ -189,7 +189,7 @@ jobs:
     - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
       with:
         enable-cache: false
-    - uses: dtolnay/rust-toolchain@stable # zizmor: ignore[unpinned-uses]
+    - run: rustup update
     - name: Build wheels
       uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
       with:
