@@ -24,7 +24,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Image Processing",
     "Typing :: Typed",
 ]
-requires-python = ">=3.10" # keep in sync with pyo3 (Cargo.toml)
+requires-python = ">=3.10"
 dependencies = [
     "exceptiongroup>=1.0.0 ; python_full_version < '3.11'", # keep in sync with typecheck dep group
     "numpy>=1.22.0",
