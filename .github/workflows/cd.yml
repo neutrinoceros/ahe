@@ -83,18 +83,21 @@ jobs:
       with:
         python-version: '3.10'
         enable-cache: false
-
     - name: Configure uv
       # this step is needed to avoid a collision with system PyPy
       run: |
         echo "UV_PYTHON_PREFERENCE=only-managed" >> $GITHUB_ENV
-
+    - id: discovery
+      run: |
+        uv python install
+        interpreter="$(uv python find 3.10)"
+        echo "interpreter=$interpreter" >> $GITHUB_OUTPUT
     - run: rustup update
     - name: Build wheels - x86_64
       uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
       with:
         target: x86_64
-        args: --release --out dist
+        args: --release --out dist -F pyo3/abi3 -i ${{ steps.discovery.outputs.interpreter }}
     - name: Test wheel
       run: |
         uv sync --only-group test
@@ -117,12 +120,17 @@ jobs:
       with:
         python-version: '3.10'
         enable-cache: false
+    - id: discovery
+      run: |
+        uv python install
+        interpreter="$(uv python find 3.10)"
+        echo "interpreter=$interpreter" >> $GITHUB_OUTPUT
     - run: rustup update
     - name: Build wheels - arm64
       uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
       with:
         target: aarch64-apple-darwin
-        args: --release --out dist
+        args: --release --out dist -F pyo3/abi3 -i ${{ steps.discovery.outputs.interpreter }}
     - name: Test wheel
       run: |
         uv sync --only-group test
@@ -153,15 +161,19 @@ jobs:
     - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
       with:
         enable-cache: false
+    - name: Configure uv
+      run: |
+        echo "UV_PYTHON_PREFERENCE=only-system" >> $env:GITHUB_ENV
+    - id: discovery
+      run: |
+        $interpreter="$(uv python find 3.10)"
+        echo "interpreter=$interpreter" >> $env:GITHUB_OUTPUT
     - run: rustup update
     - name: Build wheels
       uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
       with:
         target: ${{ matrix.target }}
-        args: --release --out dist
-    - name: Configure uv
-      run: |
-        echo "UV_PYTHON_PREFERENCE=only-system" >> $GITHUB_ENV
+        args: --release --out dist -F pyo3/abi3 -i ${{ steps.discovery.outputs.interpreter }}
     - name: Test wheel
       run: |
         uv sync --only-group test
@@ -184,20 +196,24 @@ jobs:
         persist-credentials: false
     - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
-        python-version: 3.11
+        python-version: '3.11'
         architecture: arm64
     - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
       with:
         enable-cache: false
+    - name: Configure uv
+      run: |
+        echo "UV_PYTHON_PREFERENCE=only-system" >> $env:GITHUB_ENV
+    - id: discovery
+      run: |
+        $interpreter="$(uv python find 3.11)"
+        echo "interpreter=$interpreter" >> $env:GITHUB_OUTPUT
     - run: rustup update
     - name: Build wheels
       uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
       with:
         target: aarch64-pc-windows-msvc
-        args: --release --out dist
-    - name: Configure uv
-      run: |
-        echo "UV_PYTHON_PREFERENCE=only-system" >> $GITHUB_ENV
+        args: --release --out dist -F pyo3/abi3 -i ${{ steps.discovery.outputs.interpreter }}
     - name: Test wheel
       run: |
         uv sync --only-group test
@@ -229,15 +245,15 @@ jobs:
     - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
       with:
         enable-cache: false
+    - name: Configure uv
+      run: |
+        echo "UV_PYTHON_PREFERENCE=only-system" >> $GITHUB_ENV
     - name: Build wheels
       uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
       with:
         target: ${{ matrix.target }}
         manylinux: '2_28'
-        args: --release --out dist
-    - name: Configure uv
-      run: |
-        echo "UV_PYTHON_PREFERENCE=only-system" >> $GITHUB_ENV
+        args: --release --out dist -F pyo3/abi3 -i python3.10
     - name: Test wheel
       if: matrix.target == 'x86_64'
       run: |
@@ -268,12 +284,18 @@ jobs:
       with:
         python-version: '3.10'
         architecture: x64
+    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+      with:
+        enable-cache: false
+    - name: Configure uv
+      run: |
+        echo "UV_PYTHON_PREFERENCE=only-system" >> $GITHUB_ENV
     - name: Build wheels
       uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
       with:
         target: ${{ matrix.target }}
         manylinux: musllinux_1_2
-        args: --release --out dist
+        args: --release --out dist -F pyo3/abi3 -i python3.10
     - name: Upload wheels
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
