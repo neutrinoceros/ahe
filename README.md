@@ -271,7 +271,7 @@ equivalent in `ahe`.
 
 Notes
 - in `ahe`, the default `nbins` is *generally* aligned with `scikit-image`'s (256),
-  except for kernels (or tiles) spanning less than 256 pixels. For maximu compatibility,
+  except for kernels (or tiles) spanning less than 256 pixels. For maximum compatibility,
   specifying an explicit value is recommended.
 - `ahe.equalize_histogram`'s `max_normalized_bincount` represents the same parameter as
   `skimage.exposure.equalize_adapthist`'s `clip_limit`, but their default values differ:
