@@ -81,7 +81,7 @@ jobs:
         persist-credentials: false
     - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
       with:
-        python-version: '3.10'
+        python-version: '3.11'
         enable-cache: false
     - name: Configure uv
       # this step is needed to avoid a collision with system PyPy
@@ -90,7 +90,7 @@ jobs:
     - id: discovery
       run: |
         uv python install
-        interpreter="$(uv python find 3.10)"
+        interpreter="$(uv python find 3.11)"
         echo "interpreter=$interpreter" >> $GITHUB_OUTPUT
     - run: rustup update
     - name: Build wheels - x86_64
@@ -118,12 +118,12 @@ jobs:
         persist-credentials: false
     - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
       with:
-        python-version: '3.10'
+        python-version: '3.11'
         enable-cache: false
     - id: discovery
       run: |
         uv python install
-        interpreter="$(uv python find 3.10)"
+        interpreter="$(uv python find 3.11)"
         echo "interpreter=$interpreter" >> $GITHUB_OUTPUT
     - run: rustup update
     - name: Build wheels - arm64
@@ -156,7 +156,7 @@ jobs:
         persist-credentials: false
     - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
-        python-version: '3.10'
+        python-version: '3.11'
         architecture: ${{ matrix.target }}
     - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
       with:
@@ -166,7 +166,7 @@ jobs:
         echo "UV_PYTHON_PREFERENCE=only-system" >> $env:GITHUB_ENV
     - id: discovery
       run: |
-        $interpreter="$(uv python find 3.10)"
+        $interpreter="$(uv python find 3.11)"
         echo "interpreter=$interpreter" >> $env:GITHUB_OUTPUT
     - run: rustup update
     - name: Build wheels
@@ -240,7 +240,7 @@ jobs:
         persist-credentials: false
     - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
-        python-version: '3.10'
+        python-version: '3.11'
         architecture: x64
     - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
       with:
@@ -282,7 +282,7 @@ jobs:
         persist-credentials: false
     - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
-        python-version: '3.10'
+        python-version: '3.11'
         architecture: x64
     - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
       with:

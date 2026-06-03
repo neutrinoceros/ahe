@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 - BLD: allow selecting arbitrary (supported) Python target ABIs at build time
+- DEP: support for Python 3.10 is discontinued. 3.11 or newer is now required.
 
 ## 0.1.0 - 2026-01-27
 
