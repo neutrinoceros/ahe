@@ -143,7 +143,7 @@ jobs:
         os:
         - ubuntu-latest
         python-version:
-        - '3.10'
+        - '3.11'
         - '3.14'
         - 3.14t
         build-flags: ['']
@@ -197,9 +197,11 @@ jobs:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         persist-credentials: false
+    - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      with:
+        python-version: 3.11.0
     - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
       with:
-        python-version: 3.10.0
         enable-cache: true
         prune-cache: false
         cache-suffix: test
@@ -273,7 +275,7 @@ jobs:
     strategy:
       matrix:
         python-version:
-        - '3.10'
+        - '3.11'
         - '3.14'
     runs-on: ubuntu-latest
     name: type check

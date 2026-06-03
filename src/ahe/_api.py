@@ -7,21 +7,23 @@ __all__ = [
     "TileInterpolation",
 ]
 
-import sys
 from collections import Counter
 from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import Enum, auto
 from math import ceil
-from typing import Literal, Protocol, TypeAlias, TypedDict, TypeVar, final
+from typing import (
+    Literal,
+    Protocol,
+    Self,
+    TypeAlias,
+    TypedDict,
+    TypeVar,
+    assert_never,
+    final,
+)
 
 from ahe._typing import UNSET, Pair, PairSpec, UnsetType
-
-if sys.version_info >= (3, 11):
-    from typing import Self, assert_never
-else:
-    from exceptiongroup import ExceptionGroup
-    from typing_extensions import Self, assert_never
 
 SUPPORTED_AHE_KINDS = frozenset({"sliding-tile", "tile-interpolation"})
 StrategyKind: TypeAlias = Literal["sliding-tile", "tile-interpolation"]
@@ -57,6 +59,8 @@ def as_pair(s: PairSpec[int], /) -> Pair[int]:
         case (int(s1), int(s2)):
             return (s1, s2)
         case _ as unreachable:
+            # mypy, ty and pyrefly all struggle with reachability here
+            # but pyright handles it correctly
             assert_never(unreachable)  # type: ignore[arg-type]
 
 

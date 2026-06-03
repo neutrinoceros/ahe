@@ -1,26 +1,20 @@
 # /// script
-# requires-python = ">=3.10"
+# requires-python = ">=3.11"
 # dependencies = [
 #     "loguru==0.7.3",
 #     "packaging==24.2",
-#     "tomli==2.2.1 ; python_version < '3.11'",
 # ]
 # ///
 import re
 import subprocess
 import sys
+import tomllib
 from dataclasses import dataclass
 from difflib import unified_diff
 from pathlib import Path
 
 from loguru import logger
 from packaging.version import Version
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
-
 
 logger.remove()
 logger.add(sys.stderr, colorize=True, format="<level>{level:<5} {message}</level>")

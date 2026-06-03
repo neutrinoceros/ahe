@@ -4,8 +4,7 @@ __all__ = [
     "equalize_histogram",
 ]
 
-import sys
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, assert_never
 
 import numpy as np
 
@@ -23,11 +22,6 @@ from ahe._core import (
     equalize_histogram_tile_interpolation_f64,
 )
 from ahe._typing import UNSET, UnsetType
-
-if sys.version_info >= (3, 11):
-    from typing import assert_never  # pyright: ignore[reportUnreachable]
-else:
-    from typing_extensions import assert_never  # pyright: ignore[reportUnreachable]
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -210,15 +204,15 @@ def equalize_histogram(
             # the image is never to be mutated so this won't compromise
             # correctness or consistency
             # this type:ignore comment can be removed when Python 3.10 is dropped
-            image = np.copy(image, order="C")  # type: ignore[assignment]
+            image = np.copy(image, order="C")
         histeq: Callable[
             [ndarray[tuple[int, int], dtype[F]], int, int],
             ndarray[tuple[int, int], dtype[F]],
         ]
         if input_dtype == np.dtype("float32"):
-            histeq = equalize_histogram_f32  # type: ignore[assignment] # pyright: ignore[reportAssignmentType]
+            histeq = equalize_histogram_f32  # type: ignore[assignment]
         elif input_dtype == np.dtype("float64"):
-            histeq = equalize_histogram_f64  # type: ignore[assignment] # pyright: ignore[reportAssignmentType]
+            histeq = equalize_histogram_f64  # type: ignore[assignment]
         else:
             raise AssertionError
         nbins = _resolve_nbins(nbins, image.shape)
@@ -265,26 +259,26 @@ def equalize_histogram(
                 ndarray[tuple[int, int], dtype[F]],
             ]
             if input_dtype == np.dtype("float32"):
-                histeq_st = equalize_histogram_sliding_tile_f32  # type: ignore[assignment] # pyright: ignore[reportAssignmentType]
+                histeq_st = equalize_histogram_sliding_tile_f32  # type: ignore[assignment]
             elif input_dtype == np.dtype("float64"):
-                histeq_st = equalize_histogram_sliding_tile_f64  # type: ignore[assignment] # pyright: ignore[reportAssignmentType]
+                histeq_st = equalize_histogram_sliding_tile_f64  # type: ignore[assignment]
             else:
                 raise AssertionError
-            res = histeq_st(pimage, nbins, ts, max_bincount)  # type: ignore[arg-type]
+            res = histeq_st(pimage, nbins, ts, max_bincount)
         case TileInterpolation():
             histeq_ti: Callable[
                 [ndarray[tuple[int, int], dtype[F]], int, Pair[int], int],
                 ndarray[tuple[int, int], dtype[F]],
             ]
             if input_dtype == np.dtype("float32"):
-                histeq_ti = equalize_histogram_tile_interpolation_f32  # type: ignore[assignment] # pyright: ignore[reportAssignmentType]
+                histeq_ti = equalize_histogram_tile_interpolation_f32  # type: ignore[assignment]
             elif input_dtype == np.dtype("float64"):
-                histeq_ti = equalize_histogram_tile_interpolation_f64  # type: ignore[assignment] # pyright: ignore[reportAssignmentType]
+                histeq_ti = equalize_histogram_tile_interpolation_f64  # type: ignore[assignment]
             else:
                 raise AssertionError
-            res = histeq_ti(pimage, nbins, ts, max_bincount)  # type: ignore[arg-type]
+            res = histeq_ti(pimage, nbins, ts, max_bincount)
         case _ as unreachable:  # pyright: ignore[reportUnnecessaryComparison]
             assert_never(unreachable)
 
     # unpad result
-    return res[pad_width[0][0] : -pad_width[0][1], pad_width[1][0] : -pad_width[1][1]]  # type: ignore[return-value]
+    return res[pad_width[0][0] : -pad_width[0][1], pad_width[1][0] : -pad_width[1][1]]
