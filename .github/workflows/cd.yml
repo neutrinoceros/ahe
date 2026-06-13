@@ -85,14 +85,16 @@ jobs:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         persist-credentials: false
-    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+    - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
         python-version: ${{ matrix.platform.pyver }}
+        allow-prereleases: ${{ matrix.platform.pyver == '3.15t' }}
+    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+      with:
         enable-cache: false
     - name: Configure uv
-      # this step is needed to avoid a collision with system PyPy
       run: |
-        echo "UV_PYTHON_PREFERENCE=only-managed" >> $GITHUB_ENV
+        echo "UV_PYTHON_PREFERENCE=only-system" >> $GITHUB_ENV
     - id: discovery
       run: |
         uv python install
@@ -128,21 +130,22 @@ jobs:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         persist-credentials: false
-    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+    - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
         python-version: ${{ matrix.platform.pyver }}
+        allow-prereleases: ${{ matrix.platform.pyver == '3.15t' }}
+    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+      with:
         enable-cache: false
-    - id: discovery
+    - name: Configure uv
       run: |
-        uv python install
-        interpreter="$(uv python find ${{ matrix.platform.pyver }})"
-        echo "interpreter=$interpreter" >> $GITHUB_OUTPUT
+        echo "UV_PYTHON_PREFERENCE=only-system" >> $GITHUB_ENV
     - run: rustup update
     - name: Build wheels - arm64
       uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
       with:
         target: aarch64-apple-darwin
-        args: --release --out dist -F pyo3/${{ matrix.platform.abi }} -i ${{ steps.discovery.outputs.interpreter }}
+        args: --release --out dist -F pyo3/${{ matrix.platform.abi }}
     - name: Test wheel
       run: |
         uv sync --only-group test
@@ -174,6 +177,7 @@ jobs:
       with:
         python-version: ${{ matrix.platform.pyver }}
         architecture: ${{ matrix.target }}
+        allow-prereleases: ${{ matrix.platform.pyver == '3.15t' }}
     - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
       with:
         enable-cache: false
@@ -220,13 +224,13 @@ jobs:
       with:
         python-version: ${{ matrix.platform.pyver }}
         architecture: arm64
-        allow-prereleases: true
+        allow-prereleases: ${{ matrix.platform.pyver == '3.15t' }}
     - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
       with:
         enable-cache: false
     - name: Configure uv
       run: |
-        echo "UV_PYTHON_PREFERENCE=only-system" >> $env:GITHUB_ENV
+        echo "UV_PYTHON_PREFERENCE=only-system" >> $GITHUB_ENV
     - id: discovery
       run: |
         $interpreter="$(uv python find ${{ matrix.platform.pyver }})"
@@ -268,7 +272,7 @@ jobs:
       with:
         python-version: ${{ matrix.platform.pyver }}
         architecture: x64
-        allow-prereleases: true
+        allow-prereleases: ${{ matrix.platform.pyver == '3.15t' }}
     - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
       with:
         enable-cache: false
@@ -314,7 +318,7 @@ jobs:
       with:
         python-version: ${{ matrix.platform.pyver }}
         architecture: x64
-        allow-prereleases: true
+        allow-prereleases: ${{ matrix.platform.pyver == '3.15t' }}
     - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
       with:
         enable-cache: false
@@ -352,7 +356,6 @@ jobs:
       id-token: write
 
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
     steps:
     - name: Download sdist
       uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -367,5 +370,14 @@ jobs:
         pattern: wheels-*
         merge-multiple: true
 
+    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+      with:
+        enable-cache: false
+
+    - run: uvx abi3audit dist/*.whl --verbose
+
+    - run: rm dist/*cp315t* || true # tmp
+
     - name: Publish package distributions to PyPI
+      if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
       uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
