@@ -370,7 +370,7 @@ jobs:
       with:
         enable-cache: false
 
-    - run: uvx abi3audit dist/*.whl --verbose
+    - run: uvx abi3audit dist/*cp311-abi3*.whl --verbose
 
     - run: rm dist/*abi3t* || true # tmp
 
