@@ -99,17 +99,12 @@ jobs:
       if: ${{ matrix.platform.pyver == '3.15t' }}
       run: |
         echo "UV_PRERELEASE=allow" >> $GITHUB_ENV
-    - id: discovery
-      run: |
-        uv python install
-        interpreter="$(uv python find ${{ matrix.platform.pyver }})"
-        echo "interpreter=$interpreter" >> $GITHUB_OUTPUT
     - run: rustup update
     - name: Build wheels - x86_64
       uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
       with:
         target: x86_64
-        args: --release --out dist -F pyo3/${{ matrix.platform.abi }} -i ${{ steps.discovery.outputs.interpreter }}
+        args: --release --out dist -F pyo3/${{ matrix.platform.abi }}
     - name: Test wheel
       run: |
         uv sync --only-group test
@@ -190,16 +185,12 @@ jobs:
       if: ${{ matrix.platform.pyver == '3.15t' }}
       run: |
         echo "UV_PRERELEASE=allow" >> $env:GITHUB_ENV
-    - id: discovery
-      run: |
-        $interpreter="$(uv python find ${{ matrix.platform.pyver }})"
-        echo "interpreter=$interpreter" >> $env:GITHUB_OUTPUT
     - run: rustup update
     - name: Build wheels
       uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
       with:
         target: ${{ matrix.target }}
-        args: --release --out dist -F pyo3/${{ matrix.platform.abi }} -i ${{ steps.discovery.outputs.interpreter }}
+        args: --release --out dist -F pyo3/${{ matrix.platform.abi }}
     - name: Test wheel
       run: |
         uv sync --only-group test
@@ -238,16 +229,12 @@ jobs:
       if: ${{ matrix.platform.pyver == '3.15t' }}
       run: |
         echo "UV_PRERELEASE=allow" >> $GITHUB_ENV
-    - id: discovery
-      run: |
-        $interpreter="$(uv python find ${{ matrix.platform.pyver }})"
-        echo "interpreter=$interpreter" >> $env:GITHUB_OUTPUT
     - run: rustup update
     - name: Build wheels
       uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
       with:
         target: aarch64-pc-windows-msvc
-        args: --release --out dist -F pyo3/${{ matrix.platform.abi }} -i ${{ steps.discovery.outputs.interpreter }}
+        args: --release --out dist -F pyo3/${{ matrix.platform.abi }}
     - name: Test wheel
       run: |
         uv sync --only-group test
