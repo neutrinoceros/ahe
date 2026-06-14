@@ -372,7 +372,7 @@ jobs:
 
     - run: uvx abi3audit dist/*.whl --verbose
 
-    - run: rm dist/*cp315t* || true # tmp
+    - run: rm dist/*abi3t* || true # tmp
 
     - name: Publish package distributions to PyPI
       if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
