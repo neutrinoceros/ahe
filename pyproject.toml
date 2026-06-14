@@ -73,6 +73,9 @@ exclude = [
 
 [tool.uv]
 cache-keys = [{ file = "pyproject.toml" }, { file = "src/**/*.rs" }, { file = "Cargo.toml" }, { file = "Cargo.lock" }]
+no-build-package = [
+    "numpy",
+]
 index-strategy = "unsafe-best-match"
 
 [[tool.uv.index]]
