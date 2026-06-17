@@ -76,90 +76,8 @@ jobs:
         uv pip install .
         uv run --no-project pytest --color=yes -ra
 
-  macos-intel:
-    runs-on: macos-15-intel
-    strategy:
-      fail-fast: false
-      matrix:
-        platform:
-        - {pyver: '3.11', abi: abi3}
-        # - {pyver: 3.15t, abi: abi3t}
-    steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      with:
-        persist-credentials: false
-    - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-      with:
-        python-version: ${{ matrix.platform.pyver }}
-        allow-prereleases: ${{ matrix.platform.pyver == '3.15t' }}
-    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
-      with:
-        enable-cache: false
-    - name: Configure uv
-      if: ${{ matrix.platform.pyver == '3.15t' }}
-      run: |
-        echo "UV_PRERELEASE=allow" >> $GITHUB_ENV
-    - run: rustup update
-    - name: Build wheels - x86_64
-      uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
-      with:
-        target: x86_64
-        args: --release --out dist -F pyo3/${{ matrix.platform.abi }}
-    - name: Test wheel
-      run: |
-        uv sync --only-group test
-        uv pip install numpy
-        uv pip install ahe --no-index --find-links dist --no-deps
-        uv run --no-sync pytest --color=yes
-    - name: Upload wheels
-      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-      with:
-        name: wheels-mac-intel
-        path: dist
-
-  macos-arm64:
-    runs-on: macos-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        platform:
-        - {pyver: '3.11', abi: abi3}
-        # - {pyver: 3.15t, abi: abi3t}
-    steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      with:
-        persist-credentials: false
-    - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-      with:
-        python-version: ${{ matrix.platform.pyver }}
-        allow-prereleases: ${{ matrix.platform.pyver == '3.15t' }}
-    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
-      with:
-        enable-cache: false
-    - name: Configure uv
-      if: ${{ matrix.platform.pyver == '3.15t' }}
-      run: |
-        echo "UV_PRERELEASE=allow" >> $GITHUB_ENV
-    - run: rustup update
-    - name: Build wheels - arm64
-      uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
-      with:
-        target: aarch64-apple-darwin
-        args: --release --out dist -F pyo3/${{ matrix.platform.abi }}
-    - name: Test wheel
-      run: |
-        uv sync --only-group test
-        uv pip install numpy
-        uv pip install ahe --no-index --find-links dist --no-deps
-        uv run --no-sync pytest --color=yes
-    - name: Upload wheels
-      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-      with:
-        name: wheels-mac-arm64
-        path: dist
-
-  windows:
-    runs-on: windows-latest
+  macos:
+    runs-on: ${{ matrix.target.runs-on }}
     strategy:
       fail-fast: false
       matrix:
@@ -167,60 +85,19 @@ jobs:
         - {pyver: '3.11', abi: abi3}
         # - {pyver: 3.15t, abi: abi3t}
         target:
-        - x86
-        - x64
+        - runs-on: macos-15-intel
+          arch-short: x64
+          arch-long: x86_64
+        - runs-on: macos-latest
+          arch-short: arm64
+          arch-long: aarch64-apple-darwin
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         persist-credentials: false
-    - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+    - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
       with:
         python-version: ${{ matrix.platform.pyver }}
-        architecture: ${{ matrix.target }}
-        allow-prereleases: ${{ matrix.platform.pyver == '3.15t' }}
-    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
-      with:
-        enable-cache: false
-    - name: Configure uv
-      if: ${{ matrix.platform.pyver == '3.15t' }}
-      run: |
-        echo "UV_PRERELEASE=allow" >> $env:GITHUB_ENV
-    - run: rustup update
-    - name: Build wheels
-      uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
-      with:
-        target: ${{ matrix.target }}
-        args: --release --out dist -F pyo3/${{ matrix.platform.abi }}
-    - name: Test wheel
-      run: |
-        uv sync --only-group test
-        uv pip install numpy
-        uv pip install ahe --no-index --find-links dist --no-deps
-        uv run --no-sync pytest --color=yes
-    - name: Upload wheels
-      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-      with:
-        name: wheels-win-${{ matrix.target }}
-        path: dist
-
-  windows-arm64:
-    # this job is separate because it requires a dedicated runner
-    name: windows (arm64)
-    runs-on: windows-11-arm
-    strategy:
-      fail-fast: false
-      matrix:
-        platform:
-        - {pyver: '3.11', abi: abi3}
-        # - {pyver: 3.15t, abi: abi3t}
-    steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      with:
-        persist-credentials: false
-    - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-      with:
-        python-version: ${{ matrix.platform.pyver }}
-        architecture: arm64
         allow-prereleases: ${{ matrix.platform.pyver == '3.15t' }}
     - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
       with:
@@ -231,20 +108,69 @@ jobs:
         echo "UV_PRERELEASE=allow" >> $GITHUB_ENV
     - run: rustup update
     - name: Build wheels
-      uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
+      uses: PyO3/maturin-action@04ac600d27cdf7a9a280dadf7147097c42b757ad # v1.50.1
       with:
-        target: aarch64-pc-windows-msvc
+        target: ${{ matrix.target.arch-long }}
         args: --release --out dist -F pyo3/${{ matrix.platform.abi }}
     - name: Test wheel
       run: |
         uv sync --only-group test
-        uv pip install numpy typing-extensions
+        uv pip install numpy
         uv pip install ahe --no-index --find-links dist --no-deps
         uv run --no-sync pytest --color=yes
     - name: Upload wheels
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
-        name: wheels-win-arm64
+        name: wheels-mac-${{ matrix.target.arch-short }}
+        path: dist
+
+  windows:
+    runs-on: ${{ matrix.target.runs-on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+        - {pyver: '3.11', abi: abi3}
+        #- {pyver: 3.15t, abi: abi3t}
+        target:
+        - runs-on: windows-latest
+          arch-short: x64
+          arch-long: x64
+        - runs-on: windows-11-arm
+          arch-short: arm64
+          arch-long: aarch64-pc-windows-msvc
+    steps:
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        persist-credentials: false
+    - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+      with:
+        python-version: ${{ matrix.platform.pyver }}
+        architecture: ${{ matrix.target.arch-short }}
+        allow-prereleases: ${{ matrix.platform.pyver == '3.15t' }}
+    - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+      with:
+        enable-cache: false
+    - name: Configure uv
+      if: ${{ matrix.platform.pyver == '3.15t' }}
+      run: |
+        echo "UV_PRERELEASE=allow" >> $GITHUB_ENV
+    - run: rustup update
+    - name: Build wheels
+      uses: PyO3/maturin-action@04ac600d27cdf7a9a280dadf7147097c42b757ad # v1.50.1
+      with:
+        target: ${{ matrix.target.arch-long }}
+        args: --release --out dist -F pyo3/${{ matrix.platform.abi }}
+    - name: Test wheel
+      run: |
+        uv sync --only-group test
+        uv pip install numpy
+        uv pip install ahe --no-index --find-links dist --no-deps
+        uv run --no-sync pytest --color=yes
+    - name: Upload wheels
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      with:
+        name: wheels-win-${{ matrix.target.arch-short }}
         path: dist
 
   manylinux:
@@ -339,10 +265,8 @@ jobs:
     - pre-publication-checks
     - build-sdist
     - test-sdist
-    - macos-intel
-    - macos-arm64
+    - macos
     - windows
-    - windows-arm64
     - manylinux
     - musllinux
     environment:
