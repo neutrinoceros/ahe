@@ -154,7 +154,7 @@ jobs:
     - name: Configure uv
       if: ${{ matrix.platform.pyver == '3.15t' }}
       run: |
-        echo "UV_PRERELEASE=allow" >> $GITHUB_ENV
+        echo "UV_PRERELEASE=allow" >> $env:GITHUB_ENV
     - run: rustup update
     - name: Build wheels
       uses: PyO3/maturin-action@04ac600d27cdf7a9a280dadf7147097c42b757ad # v1.50.1
