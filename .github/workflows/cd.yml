@@ -108,7 +108,7 @@ jobs:
         echo "UV_PRERELEASE=allow" >> $GITHUB_ENV
     - run: rustup update
     - name: Build wheels
-      uses: PyO3/maturin-action@04ac600d27cdf7a9a280dadf7147097c42b757ad # v1.50.1
+      uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
       with:
         target: ${{ matrix.target.arch-long }}
         args: --release --out dist -F pyo3/${{ matrix.platform.abi }}
@@ -157,7 +157,7 @@ jobs:
         echo "UV_PRERELEASE=allow" >> $env:GITHUB_ENV
     - run: rustup update
     - name: Build wheels
-      uses: PyO3/maturin-action@04ac600d27cdf7a9a280dadf7147097c42b757ad # v1.50.1
+      uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
       with:
         target: ${{ matrix.target.arch-long }}
         args: --release --out dist -F pyo3/${{ matrix.platform.abi }}
@@ -201,7 +201,7 @@ jobs:
       run: |
         echo "UV_PRERELEASE=allow" >> $GITHUB_ENV
     - name: Build wheels
-      uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
+      uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
       with:
         target: ${{ matrix.target }}
         manylinux: '2_28'
@@ -248,7 +248,7 @@ jobs:
       run: |
         echo "UV_PRERELEASE=allow" >> $GITHUB_ENV
     - name: Build wheels
-      uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
+      uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
       with:
         target: ${{ matrix.target }}
         manylinux: musllinux_1_2
