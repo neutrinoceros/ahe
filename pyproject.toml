@@ -55,7 +55,7 @@ test = [
 typecheck = [
     "basedpyright>=1.26.0",
     "mypy>=1.13.0",
-    "pyright>=1.1.391",
+    "pyright>=1.1.410",
 ]
 
 [tool.maturin]
