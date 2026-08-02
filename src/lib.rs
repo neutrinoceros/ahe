@@ -407,7 +407,7 @@ fn equalize_histogram_sliding_tile<'py, T: AtLeastF32 + numpy::Element>(
             }
 
             if subhists_need_reinit {
-                subhists.truncate(0);
+                subhists.clear();
                 for row in tile.axis_iter(Axis(0)) {
                     subhists.push_back(compute_subhistogram(row, vrange, nbins));
                 }
