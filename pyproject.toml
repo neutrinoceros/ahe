@@ -54,7 +54,7 @@ test = [
 ]
 typecheck = [
     "basedpyright>=1.26.0",
-    "mypy>=2.1.0",
+    "mypy>=2.3.0",
     "pyright>=1.1.410",
 ]
 
