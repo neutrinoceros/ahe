@@ -113,7 +113,7 @@ jobs:
     - name: Test wheel
       run: |
         uv sync --only-group test
-        uv pip install numpy
+        uv pip install --only-deps .
         uv pip install ahe --no-index --find-links dist --no-deps
         uv run --no-sync pytest --color=yes
     - name: Upload wheels
@@ -162,7 +162,7 @@ jobs:
     - name: Test wheel
       run: |
         uv sync --only-group test
-        uv pip install numpy
+        uv pip install --only-deps .
         uv pip install ahe --no-index --find-links dist --no-deps
         uv run --no-sync pytest --color=yes
     - name: Upload wheels
@@ -208,7 +208,7 @@ jobs:
       if: matrix.target == 'x86_64'
       run: |
         uv sync --only-group test
-        uv pip install numpy
+        uv pip install --only-deps .
         uv pip install ahe --no-index --find-links dist --no-deps
         uv run --no-sync pytest --color=yes
     - name: Upload wheels
