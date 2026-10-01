@@ -53,7 +53,7 @@ test = [
     "runtime-introspect>=0.4.3",
 ]
 typecheck = [
-    "basedpyright>=1.26.0",
+    "basedpyright>=1.40.1",
     "mypy>=2.3.0",
     "pyright>=1.1.410",
 ]
