@@ -40,12 +40,12 @@ requires-dist = [{ name = "numpy", specifier = ">=2.4.6" }]
 covcheck = [
     { name = "coverage", specifier = ">=7.10.0" },
     { name = "pytest", specifier = ">=9.1.1" },
-    { name = "runtime-introspect", specifier = ">=0.3.0" },
+    { name = "runtime-introspect", specifier = ">=0.4.3" },
 ]
 impl-comp = [{ name = "scikit-image", specifier = ">=0.25.2" }]
 test = [
     { name = "pytest", specifier = ">=9.1.1" },
-    { name = "runtime-introspect", specifier = ">=0.3.0" },
+    { name = "runtime-introspect", specifier = ">=0.4.3" },
 ]
 typecheck = [
     { name = "basedpyright", specifier = ">=1.26.0" },
@@ -692,11 +692,11 @@ wheels = [
 
 [[package]]
 name = "runtime-introspect"
-version = "0.3.0"
+version = "0.4.3"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/92/b4/658b75ed32005cd687ea0d868cebf57b595f817d4f67494441c053da9002/runtime_introspect-0.3.0.tar.gz", hash = "sha256:86f8a222f9622a7f8476f1c8e8ea198f3ae25a1ee15aab6685cbdb99059561c5", size = 24759, upload-time = "2025-11-04T18:33:15.664Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/66/da/d15f2ac384738c6eac8d8235140f2c3da593d39083574ba3f3359a3a8dfb/runtime_introspect-0.4.3.tar.gz", hash = "sha256:698e5db7f4c5f5b990554a93b10d1a3ecfc5319d7280380ee3b4430bcefbeba8", size = 24647, upload-time = "2026-08-18T16:14:56.77Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d1/f2/cac39d9077a0f4e11d12a7303c99a094b22b0ca5f8a426ac2a9f65aeaa9b/runtime_introspect-0.3.0-py3-none-any.whl", hash = "sha256:e38f53aab3a450499d09c9603689f2a2ca1827c1fc0fd6d136e4360353cbea63", size = 21004, upload-time = "2025-11-04T18:33:14.652Z" },
+    { url = "https://files.pythonhosted.org/packages/a5/15/8995088c18480a20f72e3ba7c4fb0167a829afdfa6b13a3df5cfa48c9f2b/runtime_introspect-0.4.3-py3-none-any.whl", hash = "sha256:9544703caaa9590fdf1ec297b29a6abb79a3ece5ad2f70698e89949ddef6e7f6", size = 20849, upload-time = "2026-08-18T16:14:55.428Z" },
 ]
 
 [[package]]
