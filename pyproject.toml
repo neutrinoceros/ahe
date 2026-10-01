@@ -92,6 +92,13 @@ filterwarnings = [
 ]
 norecursedirs = ["benchmark", "scripts", "dist"]
 
+[tool.coverage.paths]
+source = [
+    "/home/runner/work/ahe", # Ubuntu
+    "/Users/runner/work/ahe", # macOS
+    "d:\\a\\ahe", # Windows
+]
+
 [tool.coverage.run]
 branch = true
 
