@@ -23,7 +23,8 @@ from typing import (
     final,
 )
 
-from ahe._typing import UNSET, Pair, PairSpec, UnsetType
+import ahe._typing as _t
+from ahe._typing import Pair, PairSpec
 
 SUPPORTED_AHE_KINDS = frozenset({"sliding-tile", "tile-interpolation"})
 StrategyKind: TypeAlias = Literal["sliding-tile", "tile-interpolation"]
@@ -173,10 +174,10 @@ class SlidingTile:
             raise AssertionError
 
         tsp: Pair[int] | None = None
-        match spec.get("tile-size", UNSET):
+        match spec.get("tile-size", _t.UNSET):
             case (int() | (int(), int())) as ts:
                 tsp = as_pair(ts)  # type: ignore[arg-type]
-            case UnsetType():
+            case _t.UNSET:
                 raise TypeError(
                     "Sliding tile specification is missing a 'tile-size' key. "
                     "Expected a single int, or a pair thereof."
@@ -223,19 +224,19 @@ class TileInterpolation:
 
         tsp: Pair[int] | None = None
         tip: Pair[int] | None = None
-        match (spec.get("tile-into", UNSET), spec.get("tile-size", UNSET)):
-            case (UnsetType(), UnsetType()):
+        match (spec.get("tile-into", _t.UNSET), spec.get("tile-size", _t.UNSET)):
+            case (_t.UNSET, _t.UNSET):
                 exceptions.append(
                     TypeError(
                         "Neither 'tile-into' nor 'tile-size' keys were found. "
                         "Either are allowed, but exactly one is expected."
                     )
                 )
-            case (((int() | (int(), int())) as ti), UnsetType()):
+            case (((int() | (int(), int())) as ti), _t.UNSET):
                 tip = as_pair(ti)  # type: ignore[arg-type]
-            case (UnsetType(), ((int() | (int(), int())) as ts)):
+            case (_t.UNSET, ((int() | (int(), int())) as ts)):
                 tsp = as_pair(ts)  # type: ignore[arg-type]
-            case (ts, UnsetType()):
+            case (ts, _t.UNSET):
                 exceptions.append(
                     TypeError(
                         "Incorrect type associated with key 'tile-into'. "
@@ -243,7 +244,7 @@ class TileInterpolation:
                         "Expected a single int, or a pair thereof."
                     )
                 )
-            case (UnsetType(), ts):
+            case (_t.UNSET, ts):
                 exceptions.append(
                     TypeError(
                         "Incorrect type associated with key 'tile-size'. "

@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Literal, assert_never
 
 import numpy as np
 
+import ahe._typing as _t
 from ahe._api import (
     SUPPORTED_AHE_KINDS,
     SlidingTile,
@@ -21,7 +22,6 @@ from ahe._core import (
     equalize_histogram_tile_interpolation_f32,
     equalize_histogram_tile_interpolation_f64,
 )
-from ahe._typing import UNSET, UnsetType
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -222,7 +222,7 @@ def equalize_histogram(
         return histeq(image, nbins, max_bincount)
 
     ahe_type: type[Strategy]
-    match adaptive_strategy.get("kind", UNSET):
+    match adaptive_strategy.get("kind", _t.UNSET):
         case "sliding-tile":
             ahe_type = SlidingTile
         case "tile-interpolation":
@@ -232,7 +232,7 @@ def equalize_histogram(
                 f"Unknown strategy kind {unknown!r}. "
                 f"Expected one of {sorted(SUPPORTED_AHE_KINDS)}"
             )
-        case UnsetType():  # pyright: ignore[reportUnnecessaryComparison]
+        case _t.UNSET:
             raise TypeError("adaptive_strategy is missing a 'kind' key.")  # pyright: ignore[reportUnreachable]  s
         case _ as invalid:  # pyright: ignore[reportUnnecessaryComparison]
             raise TypeError(  # pyright: ignore[reportUnreachable]
