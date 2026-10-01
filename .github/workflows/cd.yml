@@ -25,7 +25,7 @@ jobs:
       with:
         fetch-depth: 0
         persist-credentials: false
-    - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+    - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       with:
         enable-cache: false
     - name: Pre-publication checks
@@ -39,7 +39,7 @@ jobs:
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
-    - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+    - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       with:
         cache-suffix: build
     - name: Build sdist
@@ -59,7 +59,7 @@ jobs:
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
-    - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+    - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       with:
         enable-cache: false
     - run: uv sync --only-group test
@@ -97,7 +97,7 @@ jobs:
       with:
         python-version: ${{ matrix.platform.pyver }}
         allow-prereleases: ${{ matrix.platform.pyver == '3.15t' }}
-    - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+    - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       with:
         enable-cache: false
     - name: Configure uv
@@ -146,7 +146,7 @@ jobs:
         python-version: ${{ matrix.platform.pyver }}
         architecture: ${{ matrix.target.arch-short }}
         allow-prereleases: ${{ matrix.platform.pyver == '3.15t' }}
-    - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+    - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       with:
         enable-cache: false
     - name: Configure uv
@@ -191,7 +191,7 @@ jobs:
         python-version: ${{ matrix.platform.pyver }}
         architecture: x64
         allow-prereleases: ${{ matrix.platform.pyver == '3.15t' }}
-    - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+    - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       with:
         enable-cache: false
     - name: Configure uv
@@ -238,7 +238,7 @@ jobs:
         python-version: ${{ matrix.platform.pyver }}
         architecture: x64
         allow-prereleases: ${{ matrix.platform.pyver == '3.15t' }}
-    - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+    - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       with:
         enable-cache: false
     - name: Configure uv
@@ -288,7 +288,7 @@ jobs:
         pattern: wheels-*
         merge-multiple: true
 
-    - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+    - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       with:
         enable-cache: false
 
