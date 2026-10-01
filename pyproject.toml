@@ -43,7 +43,7 @@ build-backend = "maturin"
 [dependency-groups]
 covcheck = [
     {include-group = "test"},
-    "coverage>=7.10.0",
+    "coverage>=7.16.1",
 ]
 impl-comp = [
     "scikit-image>=0.25.2",
