@@ -95,8 +95,8 @@ Here's how to use it in `ahe`
 image_eq = ahe.equalize_histogram(
     image,
     adaptive_strategy={
-        'kind': 'sliding-tile',
-        'tile-size': 15,
+        "kind": "sliding-tile",
+        "tile-size": 15,
     },
 )
 ```
@@ -117,12 +117,11 @@ In this method, an image is split into equal-sized sub domains (tiles), which ma
 specified either from a tile size
 
 ```python
-
 image_eq = ahe.equalize_histogram(
     image,
     adaptive_strategy={
-        'kind': 'tile-interpolation',
-        'tile-size': 16,
+        "kind": "tile-interpolation",
+        "tile-size": 16,
     },
 )
 ```
@@ -132,8 +131,8 @@ or as a number of tiles to split the domain into (in each direction)
 image_eq = equalize_histogram(
     image,
     adaptive_strategy={
-        'kind': 'tile-interpolation',
-        'tile-into': 8,
+        "kind": "tile-interpolation",
+        "tile-into": 8,
     },
 )
 ```
@@ -304,8 +303,8 @@ result = ahe.equalize_histogram(
     array,
     nbins=256,
     adaptive_strategy={
-      "kind": "tile-interpolation",
-      "tile-into": 8, # or (8, 8)
+        "kind": "tile-interpolation",
+        "tile-into": 8,  # or (8, 8)
     },
 )
 ```
@@ -323,8 +322,8 @@ result = ahe.equalize_histogram(
     array,
     nbins=256,
     adaptive_strategy={
-      "kind": "tile-interpolation",
-      "tile-size": 64, # or (64, 64)
+        "kind": "tile-interpolation",
+        "tile-size": 64,  # or (64, 64)
     },
     max_normalized_bincount=0.01,
 )
