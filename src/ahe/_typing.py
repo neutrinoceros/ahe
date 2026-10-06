@@ -1,19 +1,17 @@
 __all__ = [
     "Pair",
     "PairSpec",
-    "UnsetType",
     "UNSET",
 ]
-from enum import Enum, auto
+import sys
 from typing import TypeAlias, TypeVar
+
+if sys.version_info < (3, 15):
+    from typing_extensions import sentinel
 
 T = TypeVar("T")
 Pair: TypeAlias = tuple[T, T]
 PairSpec: TypeAlias = T | Pair[T]
 
 
-class UnsetType(Enum):
-    UNSET = auto()
-
-
-UNSET = UnsetType.UNSET
+UNSET = sentinel("UNSET")
