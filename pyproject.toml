@@ -74,7 +74,13 @@ exclude = [
 [tool.uv]
 cache-keys = [{ file = "pyproject.toml" }, { file = "src/**/*.rs" }, { file = "Cargo.toml" }, { file = "Cargo.lock" }]
 no-build-package = [
+    "ast-serialize",
+    "librt",
+    "mypy",
     "numpy",
+    "pillow",
+    "scikit-image",
+    "scipy",
 ]
 index-strategy = "unsafe-best-match"
 
