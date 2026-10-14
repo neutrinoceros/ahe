@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.11"
 resolution-markers = [
     "python_full_version >= '3.15'",
@@ -34,7 +34,7 @@ typecheck = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "numpy", specifier = ">=2.4.6" }]
+requires-dist = [{ name = "numpy", specifier = ">=1.23.2" }]
 
 [package.metadata.requires-dev]
 covcheck = [
