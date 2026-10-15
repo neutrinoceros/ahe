@@ -133,22 +133,24 @@ jobs:
     - run: cargo test --verbose
 
   python-tests:
-    name: ${{matrix.os}} x py${{matrix.python-version}} ${{matrix.label}}
+    name: ${{ matrix.os }} x py${{ matrix.context.python-version }} ${{ matrix.label }}
     strategy:
       fail-fast: false
       matrix:
         os:
         - ubuntu-latest
-        python-version:
-        - '3.11'
-        - '3.14'
-        - 3.14t
+        context:
+        - {python-version: '3.11', group-args: --group impl-comp}
+        - {python-version: '3.14', group-args: --group impl-comp}
+        - {python-version: 3.14t, group-args: --group impl-comp}
         build-flags: ['']
         label: ['']
 
         include:
         - os: ubuntu-latest
-          python-version: '3.14'
+          context:
+            python-version: '3.14'
+            group-args: ''
           build-flags: --config-setting 'build-args=--profile=dev'
           label: (debug build)
 
@@ -160,18 +162,18 @@ jobs:
         persist-credentials: false
     - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: ${{ matrix.context.python-version }}
         cache-suffix: covcheck
 
     - name: Test
       run: |
-        uv sync --group covcheck --group impl-comp ${{ matrix.build-flags }}
+        uv sync --group covcheck ${{ matrix.context.group-args }} ${{ matrix.build-flags }}
         uv run --no-sync coverage run --parallel-mode -m pytest --color=yes --doctest-modules
 
     - name: Upload coverage data
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
-        name: ahe_coverage_data-${{matrix.os}}-${{matrix.python-version}}-${{matrix.label}}
+        name: ahe_coverage_data-${{ matrix.os }}-${{ matrix.context.python-version }}-${{ matrix.label }}
         path: .coverage.*
         if-no-files-found: ignore
         include-hidden-files: true
@@ -268,7 +270,7 @@ jobs:
 
     - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: ${{ matrix.context-python-version }}
         cache-suffix: typecheck
 
     - run: uv sync --group typecheck
