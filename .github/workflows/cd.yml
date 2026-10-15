@@ -81,7 +81,7 @@ jobs:
       matrix:
         platform:
         - {pyver: '3.11', abi: abi3}
-        # - {pyver: 3.15t, abi: abi3t}
+        - {pyver: 3.15t, abi: abi3t}
         target:
         - runs-on: macos-15-intel
           arch-short: x64
@@ -129,7 +129,7 @@ jobs:
       matrix:
         platform:
         - {pyver: '3.11', abi: abi3}
-        #- {pyver: 3.15t, abi: abi3t}
+        - {pyver: 3.15t, abi: abi3t}
         target:
         - runs-on: windows-latest
           arch-short: x64
@@ -178,7 +178,7 @@ jobs:
       matrix:
         platform:
         - {pyver: '3.11', abi: abi3}
-        # - {pyver: 3.15t, abi: abi3t}
+        - {pyver: 3.15t, abi: abi3t}
         target:
         - x86_64
         - aarch64
@@ -225,7 +225,7 @@ jobs:
       matrix:
         platform:
         - {pyver: '3.11', abi: abi3}
-        # - {pyver: 3.15t, abi: abi3t}
+        - {pyver: 3.15t, abi: abi3t}
         target:
         - x86_64-unknown-linux-musl
         - aarch64-unknown-linux-musl
@@ -292,9 +292,9 @@ jobs:
       with:
         enable-cache: false
 
-    - run: uvx abi3audit dist/*cp311-abi3*.whl --verbose
-
-    - run: rm dist/*abi3t* || true # tmp
+    # TODO: audit all wheels when abi3audit supports abi3t
+    # https://github.com/pypa/abi3audit/pull/233
+    - run: uvx abi3audit dist/*cp311*.whl --verbose
 
     - name: Publish package distributions to PyPI
       if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')
