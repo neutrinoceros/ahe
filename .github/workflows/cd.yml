@@ -96,14 +96,9 @@ jobs:
     - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: ${{ matrix.platform.pyver }}
-        allow-prereleases: ${{ matrix.platform.pyver == '3.15t' }}
     - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       with:
         enable-cache: false
-    - name: Configure uv
-      if: ${{ matrix.platform.pyver == '3.15t' }}
-      run: |
-        echo "UV_PRERELEASE=allow" >> $GITHUB_ENV
     - run: rustup update
     - name: Build wheels
       uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
@@ -145,14 +140,9 @@ jobs:
       with:
         python-version: ${{ matrix.platform.pyver }}
         architecture: ${{ matrix.target.arch-short }}
-        allow-prereleases: ${{ matrix.platform.pyver == '3.15t' }}
     - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       with:
         enable-cache: false
-    - name: Configure uv
-      if: ${{ matrix.platform.pyver == '3.15t' }}
-      run: |
-        echo "UV_PRERELEASE=allow" >> $env:GITHUB_ENV
     - run: rustup update
     - name: Build wheels
       uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
@@ -190,14 +180,9 @@ jobs:
       with:
         python-version: ${{ matrix.platform.pyver }}
         architecture: x64
-        allow-prereleases: ${{ matrix.platform.pyver == '3.15t' }}
     - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       with:
         enable-cache: false
-    - name: Configure uv
-      if: ${{ matrix.platform.pyver == '3.15t' }}
-      run: |
-        echo "UV_PRERELEASE=allow" >> $GITHUB_ENV
     - name: Build wheels
       uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
       with:
@@ -237,14 +222,9 @@ jobs:
       with:
         python-version: ${{ matrix.platform.pyver }}
         architecture: x64
-        allow-prereleases: ${{ matrix.platform.pyver == '3.15t' }}
     - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       with:
         enable-cache: false
-    - name: Configure uv
-      if: ${{ matrix.platform.pyver == '3.15t' }}
-      run: |
-        echo "UV_PRERELEASE=allow" >> $GITHUB_ENV
     - name: Build wheels
       uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
       with:
