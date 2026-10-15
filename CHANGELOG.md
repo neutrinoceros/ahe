@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - BLD: allow selecting arbitrary (supported) Python target ABIs at build time
 - DEP: support for Python 3.10 is discontinued. 3.11 or newer is now required.
 - DEP: bump rust-numpy and pyo3 to 0.30.x
+- DEP: upgrade other rust dependencies
 - TST: add support for CPython 3.15
 - WHL: drop win32 support (stop distributing wheels)
 - WHL: add support for free-threaded CPython 3.15+
