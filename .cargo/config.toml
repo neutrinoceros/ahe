@@ -1,3 +1,6 @@
+[registry]
+global-min-publish-age = "7 days"
+
 # https://en.wikipedia.org/wiki/X86-64#Microarchitecture_levels
 [target.'cfg(any(target_arch = "x86_64", target_arch = "x64"))']
 rustflags = ["-C", "target-cpu=x86-64-v3"] # circa 2013
